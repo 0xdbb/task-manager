@@ -1,0 +1,34 @@
+version: "2"
+sql:
+- schema: "internal/database/migrations"
+  queries: "internal/database/query"
+  engine: "postgresql"
+  gen:
+    go: 
+      package: "database"
+      out: "./internal/database/sqlc"
+      sql_package: "pgx/v5"
+      emit_json_tags: true
+      # emit_interface: true
+      emit_empty_slices: true
+      emit_exact_table_names: true
+      overrides:
+        - db_type: "timestamptz"
+          go_type: "time.Time"
+          nullable: true
+        - db_type: "timestamp"
+          go_type: "time.Time"
+          nullable: true
+        - db_type: "uuid"
+          go_type: "github.com/google/uuid.UUID"
+          # nullable: true
+        - db_type: "text"
+          go_type: "string"
+        - db_type: "numeric"
+          go_type: "float64"
+        - db_type: "decimal"
+          go_type: "float64"
+        - db_type: "decimal(10,2)"
+          go_type: "float64"
+        - db_type: "real"
+          go_type: "float64"
