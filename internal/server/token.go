@@ -1,4 +1,4 @@
-package handler
+package server
 
 import (
 	"errors"
@@ -31,7 +31,7 @@ type renewAccessTokenResponse struct {
 // @Failure      404  {object}  ErrorResponse "Session not found"
 // @Failure      500  {object}  ErrorResponse "Internal server error"
 // @Router       /auth/renew [post]
-func (h *Handler) RenewAccessToken(ctx *gin.Context) {
+func (h *Server) RenewAccessToken(ctx *gin.Context) {
 	var req renewAccessTokenRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request"))

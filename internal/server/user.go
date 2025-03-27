@@ -1,4 +1,4 @@
-package handler
+package server
 
 import (
 	"errors"
@@ -90,7 +90,7 @@ func newUserResponse(user db.User) UserResponse {
 // @Failure		400		{object}	ErrorResponse
 // @Failure		500		{object}	ErrorResponse
 // @Router			/user [get]
-func (h *Handler) GetUsers(ctx *gin.Context) {
+func (h *Server) GetUsers(ctx *gin.Context) {
 	var req UsersRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -123,7 +123,7 @@ func (h *Handler) GetUsers(ctx *gin.Context) {
 // @Failure		404	{object}	ErrorResponse
 // @Failure		500	{object}	ErrorResponse
 // @Router			/user/{id} [get]
-func (h *Handler) GetUser(ctx *gin.Context) {
+func (h *Server) GetUser(ctx *gin.Context) {
 	var userReq UserRequest
 
 	if err := ctx.ShouldBindUri(&userReq); err != nil {
@@ -155,7 +155,7 @@ func (h *Handler) GetUser(ctx *gin.Context) {
 // @Failure		404	{object}	ErrorResponse
 // @Failure		500	{object}	ErrorResponse
 // @Router			/user/{id} [put]
-func (h *Handler) UpdateUser(ctx *gin.Context) {
+func (h *Server) UpdateUser(ctx *gin.Context) {
 	var user UpdateUserRequest
 
 	userID := ctx.Param("id")
@@ -198,7 +198,7 @@ func (h *Handler) UpdateUser(ctx *gin.Context) {
 // @Failure		400		{object}	ErrorResponse
 // @Failure		500		{object}	ErrorResponse
 // @Router			/user/register [post]
-func (h *Handler) Register(ctx *gin.Context) {
+func (h *Server) Register(ctx *gin.Context) {
 	var user CreateUserRequest
 
 	if err := ctx.ShouldBindJSON(&user); err != nil {
@@ -245,7 +245,7 @@ func (h *Handler) Register(ctx *gin.Context) {
 // @Failure		404		{object}	ErrorResponse
 // @Failure		500		{object}	ErrorResponse
 // @Router			/user/login [post]
-func (h *Handler) Login(ctx *gin.Context) {
+func (h *Server) Login(ctx *gin.Context) {
 	var userLoginReq UserLoginRequest
 
 	if err := ctx.ShouldBindJSON(&userLoginReq); err != nil {

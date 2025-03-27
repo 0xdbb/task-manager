@@ -3,26 +3,24 @@ SELECT * FROM "user"
 WHERE id = $1;
 
 -- name: ListUsers :many
-SELECT id, first_name, last_name, email 
+SELECT id,  email 
 FROM "user"
 ORDER BY id
 LIMIT $1 OFFSET $2;
 
 -- name: CreateUser :one
 INSERT INTO "user" (
-   first_name, last_name, email, password, address, phone,  date_of_birth
+     name,email, password 
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7
+  $1, $2, $3
 )
 RETURNING *;
 
 -- name: UpdateUser :one
 UPDATE "user"
-SET first_name = $2,
-    last_name = $3,
-    address = $4,
-    date_of_birth = $5,
-    phone = $6,
+SET name = $2,
+    type = $3,
+    phone = $4,
     updated_at = now()
 WHERE id = $1
 RETURNING *;

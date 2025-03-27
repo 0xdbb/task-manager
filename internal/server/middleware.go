@@ -1,11 +1,11 @@
-package handler
+package server
 
 import (
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
-	"task-manager/internal/server/token"
+	"task-manager/internal/token"
 
 	"github.com/gin-gonic/gin"
 )

@@ -6,8 +6,7 @@ import (
 	"net/http"
 	"task-manager/config"
 	db "task-manager/internal/database/sqlc"
-	"task-manager/internal/server/handler"
-	"task-manager/internal/server/token"
+	"task-manager/internal/token"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -20,16 +19,9 @@ type Server struct {
 
 	tokenMaker token.Maker
 
+	db *db.Service
+
 	config *config.Config
-
-	handlers *handler.Handler
-}
-
-func (s *Server) setHandlers(service *db.Service, config *config.Config, tokenMaker token.Maker) {
-
-	serveHandler := handler.NewHandler(service, config, tokenMaker)
-
-	s.handlers = serveHandler
 }
 
 func NewServer(config *config.Config) (*http.Server, error) {
@@ -52,6 +44,8 @@ func NewServer(config *config.Config) (*http.Server, error) {
 		return nil, fmt.Errorf("Error creating token maker %w", err)
 	}
 
+	newService := db.NewService(dburl)
+
 	NewServer := &Server{
 
 		engine: gin.Default(),
@@ -59,16 +53,13 @@ func NewServer(config *config.Config) (*http.Server, error) {
 		config: config,
 
 		tokenMaker: tokenMaker,
-	}
 
-	newService := db.NewService(dburl)
+		db: newService,
+	}
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("StrongPassword", handler.StrongPassword)
+		v.RegisterValidation("StrongPassword", StrongPassword)
 	}
-
-	// NewServer.engine.Use(helmet.Default())
-	NewServer.setHandlers(newService, NewServer.config, NewServer.tokenMaker)
 
 	NewServer.Cors()
 
@@ -76,7 +67,7 @@ func NewServer(config *config.Config) (*http.Server, error) {
 
 	port := fmt.Sprintf(":%s", config.PORT)
 
-	log.Printf("Server spinning on Port %s.....\n", port)
+	log.Printf("------Server spinning on Port %s-------\n", port)
 
 	// Declare Server config
 	server := &http.Server{

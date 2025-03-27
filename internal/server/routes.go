@@ -3,7 +3,6 @@ package server
 import (
 	"net/http"
 	"strings"
-	"task-manager/internal/server/handler"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -24,16 +23,16 @@ func (s *Server) RegisterRoutes() {
 func (s *Server) UserRoutes(v1 *gin.RouterGroup) {
 	userRouteGroup := v1.Group("/user")
 	{
-		userRouteGroup.GET("/", s.handlers.GetUsers)
-		userRouteGroup.GET("/:id", s.handlers.GetUser)
-		userRouteGroup.PUT("/:id", s.handlers.UpdateUser)
-		userRouteGroup.POST("/login", s.handlers.Login)
-		userRouteGroup.POST("/register", s.handlers.Register)
+		userRouteGroup.GET("/", s.GetUsers)
+		userRouteGroup.GET("/:id", s.GetUser)
+		userRouteGroup.PUT("/:id", s.UpdateUser)
+		userRouteGroup.POST("/login", s.Login)
+		userRouteGroup.POST("/register", s.Register)
 	}
 }
 
 func (s *Server) RenewTokenRoute(v1 *gin.RouterGroup) {
-	v1.POST("/tokens/renew_access", s.handlers.RenewAccessToken)
+	v1.POST("/tokens/renew_access", s.RenewAccessToken)
 }
 
 func (s *Server) SwaggerRoute(v1 *gin.RouterGroup) {

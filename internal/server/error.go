@@ -1,4 +1,4 @@
-package handler
+package server
 
 // HandleError represents the structure of error messages in API responses
 type ErrorResponse struct {
