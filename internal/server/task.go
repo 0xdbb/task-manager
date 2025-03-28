@@ -14,9 +14,13 @@ import (
 
 // Task Types
 type CreateTaskRequest struct {
-	Type    string    `json:"title" binding:"required" example:"Complete project"`
-	Payload string    `json:"payload" example:"Example payload"`
-	DueDate time.Time `json:"due_date" example:"2025-03-30T12:00:00Z"`
+	Title       string    `json:"title" binding:"required" example:"Image Processing"`
+	Type        string    `json:"type" binding:"required" example:"Image Processing"`
+	Description string    `json:"description" binding:"required" example:"Image Processing"`
+	UserID      uuid.UUID `json:"user_id" binding:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Priority    string    `json:"priority" binding:"required" example:"high"`
+	Payload     string    `json:"payload" binding:"required" example:"Example payload"`
+	DueTime     time.Time `json:"due_date" binding:"required" example:"2025-03-30T12:00:00Z"`
 }
 
 type UpdateTaskRequest struct {
@@ -31,7 +35,7 @@ type TaskRequest struct {
 type TasksRequest struct {
 	PageSize int32     `query:"page_size" binding:"required,min=1" example:"10"`
 	PageID   int32     `query:"page_id" binding:"required,min=1" example:"1"`
-	UserID   uuid.UUID `form:"query" example:"123e4567-e89b-12d3-a456-426614174000"`
+	UserID   uuid.UUID `query:"user_id" example:"123e4567-e89b-12d3-a456-426614174000"`
 }
 
 // @Summary		Get all created Tasks
@@ -127,7 +131,7 @@ func (h *Server) CreateTask(ctx *gin.Context) {
 	}
 
 	taskArg := db.CreateTaskParams{
-		DueTime: task.DueDate,
+		DueTime: task.DueTime,
 	}
 
 	createdTask, err := h.db.CreateTask(ctx, taskArg)
