@@ -130,6 +130,8 @@ func (h *Server) CreateTask(ctx *gin.Context) {
 		return
 	}
 
+	// TODO: Publish to queue
+
 	taskArg := db.CreateTaskParams{
 		DueTime: task.DueTime,
 	}
