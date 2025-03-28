@@ -13,7 +13,7 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO "user" (
-     name, email, password, role
+    name, email, password, role
 ) VALUES (
   $1, $2, $3, $4
 )
@@ -21,10 +21,10 @@ RETURNING id, name, email, password, role, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Role     string `json:"role"`
+	Name     string   `json:"name"`
+	Email    string   `json:"email"`
+	Password string   `json:"password"`
+	Role     UserRole `json:"role"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -133,23 +133,21 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUse
 	return items, nil
 }
 
-const updateUser = `-- name: UpdateUser :one
+const updateUserRole = `-- name: UpdateUserRole :one
 UPDATE "user"
-SET name = $2,
-    role = $3,
+SET role = $2,
     updated_at = now()
 WHERE id = $1
 RETURNING id, name, email, password, role, created_at, updated_at
 `
 
-type UpdateUserParams struct {
+type UpdateUserRoleParams struct {
 	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
-	Role string    `json:"role"`
+	Role UserRole  `json:"role"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, updateUser, arg.ID, arg.Name, arg.Role)
+func (q *Queries) UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserRole, arg.ID, arg.Role)
 	var i User
 	err := row.Scan(
 		&i.ID,

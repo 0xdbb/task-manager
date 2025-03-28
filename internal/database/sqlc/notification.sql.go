@@ -42,7 +42,7 @@ func (q *Queries) DeleteNotification(ctx context.Context, id uuid.UUID) error {
 }
 
 const listUserNotifications = `-- name: ListUserNotifications :many
-SELECT id, user_id, task_id, message, read, created_at FROM "notification"
+SELECT id, user_id, task_id, message, sent, created_at FROM "notification"
 WHERE user_id = $1
 ORDER BY created_at DESC
 `
@@ -61,7 +61,7 @@ func (q *Queries) ListUserNotifications(ctx context.Context, userID pgtype.UUID)
 			&i.UserID,
 			&i.TaskID,
 			&i.Message,
-			&i.Read,
+			&i.Sent,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err

@@ -15,18 +15,38 @@ import (
 func (s *Server) RegisterRoutes() {
 	v1 := s.engine.Group("/api/v1")
 	{
-		s.UserRoutes(v1)
 		s.SwaggerRoute(v1)
+		s.UserRoutes(v1)
+		s.TaskRoutes(v1)
+	}
+}
+
+func (s *Server) AuthRoutes(v1 *gin.RouterGroup) {
+	AdminUserRouteGroup := v1.Group("/auth")
+	{
+		AdminUserRouteGroup.POST("/login", s.Login)
+		AdminUserRouteGroup.POST("/register", s.Register)
+		AdminUserRouteGroup.POST("/tokens/renew_access", s.RenewAccessToken)
 	}
 }
 
 func (s *Server) UserRoutes(v1 *gin.RouterGroup) {
-	userRouteGroup := v1.Group("/user")
+	userRouteGroup := v1.Group("/user").Use(AuthMiddleware(s.tokenMaker))
 	{
 		userRouteGroup.GET("/", s.GetUsers)
 		userRouteGroup.GET("/:id", s.GetUser)
-		userRouteGroup.POST("/login", s.Login)
-		userRouteGroup.POST("/register", s.Register)
+		userRouteGroup.PATCH("/:id", s.UpdateUserRole)
+		userRouteGroup.DELETE("/:id", s.DeleteUser)
+	}
+}
+
+func (s *Server) TaskRoutes(v1 *gin.RouterGroup) {
+	taskRouteGroup := v1.Group("/task").Use(AuthMiddleware(s.tokenMaker))
+	{
+		taskRouteGroup.GET("/", s.GetTasks)
+		taskRouteGroup.GET("/:id", s.GetTask)
+		taskRouteGroup.POST("/", s.CreateTask)
+		taskRouteGroup.PATCH("/:id", s.UpdateTaskStatus)
 	}
 }
 

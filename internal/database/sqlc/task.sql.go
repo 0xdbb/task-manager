@@ -15,32 +15,43 @@ import (
 
 const createTask = `-- name: CreateTask :one
 INSERT INTO "task" (
-  user_id, type, payload, status, due_time
+  user_id, title, description, result, type, payload, status, due_time, priority
 ) VALUES (
-  $1, $2, $3, 'pending', $4
+  $1, $2, $3, $4, $5, $6, 'pending', $7, $8
 )
-RETURNING id, user_id, type, payload, status, result, due_time, created_at, updated_at
+RETURNING id, title, type, description, user_id, priority, payload, status, result, due_time, created_at, updated_at
 `
 
 type CreateTaskParams struct {
-	UserID  uuid.UUID `json:"user_id"`
-	Type    string    `json:"type"`
-	Payload string    `json:"payload"`
-	DueTime time.Time `json:"due_time"`
+	UserID      uuid.UUID    `json:"user_id"`
+	Title       string       `json:"title"`
+	Description string       `json:"description"`
+	Result      pgtype.Text  `json:"result"`
+	Type        string       `json:"type"`
+	Payload     string       `json:"payload"`
+	DueTime     time.Time    `json:"due_time"`
+	Priority    TaskPriority `json:"priority"`
 }
 
 func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, error) {
 	row := q.db.QueryRow(ctx, createTask,
 		arg.UserID,
+		arg.Title,
+		arg.Description,
+		arg.Result,
 		arg.Type,
 		arg.Payload,
 		arg.DueTime,
+		arg.Priority,
 	)
 	var i Task
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
+		&i.Title,
 		&i.Type,
+		&i.Description,
+		&i.UserID,
+		&i.Priority,
 		&i.Payload,
 		&i.Status,
 		&i.Result,
@@ -62,7 +73,7 @@ INSERT INTO "task_log" (
 type CreateTaskLogParams struct {
 	TaskID   uuid.UUID   `json:"task_id"`
 	WorkerID pgtype.Text `json:"worker_id"`
-	Status   string      `json:"status"`
+	Status   TaskStatus  `json:"status"`
 	Message  pgtype.Text `json:"message"`
 }
 
@@ -87,7 +98,7 @@ func (q *Queries) DeleteTask(ctx context.Context, id uuid.UUID) error {
 }
 
 const getTask = `-- name: GetTask :one
-SELECT id, user_id, type, payload, status, result, due_time, created_at, updated_at FROM "task"
+SELECT id, title, type, description, user_id, priority, payload, status, result, due_time, created_at, updated_at FROM "task"
 WHERE id = $1
 `
 
@@ -96,8 +107,11 @@ func (q *Queries) GetTask(ctx context.Context, id uuid.UUID) (Task, error) {
 	var i Task
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
+		&i.Title,
 		&i.Type,
+		&i.Description,
+		&i.UserID,
+		&i.Priority,
 		&i.Payload,
 		&i.Status,
 		&i.Result,
@@ -143,8 +157,52 @@ func (q *Queries) GetTaskLog(ctx context.Context, taskID uuid.UUID) ([]TaskLog, 
 	return items, nil
 }
 
+const listAllTasks = `-- name: ListAllTasks :many
+SELECT id, title, type, description, user_id, priority, payload, status, result, due_time, created_at, updated_at FROM "task"
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListAllTasksParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListAllTasks(ctx context.Context, arg ListAllTasksParams) ([]Task, error) {
+	rows, err := q.db.Query(ctx, listAllTasks, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Task{}
+	for rows.Next() {
+		var i Task
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Type,
+			&i.Description,
+			&i.UserID,
+			&i.Priority,
+			&i.Payload,
+			&i.Status,
+			&i.Result,
+			&i.DueTime,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listTasksByUser = `-- name: ListTasksByUser :many
-SELECT id, user_id, type, payload, status, result, due_time, created_at, updated_at FROM "task"
+SELECT id, title, type, description, user_id, priority, payload, status, result, due_time, created_at, updated_at FROM "task"
 WHERE user_id = $1
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -167,8 +225,11 @@ func (q *Queries) ListTasksByUser(ctx context.Context, arg ListTasksByUserParams
 		var i Task
 		if err := rows.Scan(
 			&i.ID,
-			&i.UserID,
+			&i.Title,
 			&i.Type,
+			&i.Description,
+			&i.UserID,
+			&i.Priority,
 			&i.Payload,
 			&i.Status,
 			&i.Result,
@@ -192,13 +253,13 @@ SET status = $2,
     result = $3,
     updated_at = now()
 WHERE id = $1
-RETURNING id, user_id, type, payload, status, result, due_time, created_at, updated_at
+RETURNING id, title, type, description, user_id, priority, payload, status, result, due_time, created_at, updated_at
 `
 
 type UpdateTaskStatusParams struct {
-	ID     uuid.UUID   `json:"id"`
-	Status pgtype.Text `json:"status"`
-	Result pgtype.Text `json:"result"`
+	ID     uuid.UUID      `json:"id"`
+	Status NullTaskStatus `json:"status"`
+	Result pgtype.Text    `json:"result"`
 }
 
 func (q *Queries) UpdateTaskStatus(ctx context.Context, arg UpdateTaskStatusParams) (Task, error) {
@@ -206,8 +267,11 @@ func (q *Queries) UpdateTaskStatus(ctx context.Context, arg UpdateTaskStatusPara
 	var i Task
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
+		&i.Title,
 		&i.Type,
+		&i.Description,
+		&i.UserID,
+		&i.Priority,
 		&i.Payload,
 		&i.Status,
 		&i.Result,

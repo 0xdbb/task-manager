@@ -5,18 +5,149 @@
 package database
 
 import (
+	"database/sql/driver"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type TaskPriority string
+
+const (
+	TaskPriorityLOW    TaskPriority = "LOW"
+	TaskPriorityMEDIUM TaskPriority = "MEDIUM"
+	TaskPriorityHIGH   TaskPriority = "HIGH"
+)
+
+func (e *TaskPriority) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = TaskPriority(s)
+	case string:
+		*e = TaskPriority(s)
+	default:
+		return fmt.Errorf("unsupported scan type for TaskPriority: %T", src)
+	}
+	return nil
+}
+
+type NullTaskPriority struct {
+	TaskPriority TaskPriority `json:"task_priority"`
+	Valid        bool         `json:"valid"` // Valid is true if TaskPriority is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullTaskPriority) Scan(value interface{}) error {
+	if value == nil {
+		ns.TaskPriority, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.TaskPriority.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullTaskPriority) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.TaskPriority), nil
+}
+
+type TaskStatus string
+
+const (
+	TaskStatusPENDING    TaskStatus = "PENDING"
+	TaskStatusINPROGRESS TaskStatus = "IN-PROGRESS"
+	TaskStatusFAILED     TaskStatus = "FAILED"
+)
+
+func (e *TaskStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = TaskStatus(s)
+	case string:
+		*e = TaskStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for TaskStatus: %T", src)
+	}
+	return nil
+}
+
+type NullTaskStatus struct {
+	TaskStatus TaskStatus `json:"task_status"`
+	Valid      bool       `json:"valid"` // Valid is true if TaskStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullTaskStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.TaskStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.TaskStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullTaskStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.TaskStatus), nil
+}
+
+type UserRole string
+
+const (
+	UserRoleADMIN    UserRole = "ADMIN"
+	UserRoleSTANDARD UserRole = "STANDARD"
+	UserRoleWORKER   UserRole = "WORKER"
+)
+
+func (e *UserRole) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserRole(s)
+	case string:
+		*e = UserRole(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserRole: %T", src)
+	}
+	return nil
+}
+
+type NullUserRole struct {
+	UserRole UserRole `json:"user_role"`
+	Valid    bool     `json:"valid"` // Valid is true if UserRole is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserRole) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserRole, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserRole.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserRole) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserRole), nil
+}
+
 type Notification struct {
 	ID        uuid.UUID   `json:"id"`
 	UserID    pgtype.UUID `json:"user_id"`
 	TaskID    pgtype.UUID `json:"task_id"`
 	Message   pgtype.Text `json:"message"`
-	Read      pgtype.Bool `json:"read"`
+	Sent      pgtype.Bool `json:"sent"`
 	CreatedAt time.Time   `json:"created_at"`
 }
 
@@ -32,22 +163,25 @@ type Session struct {
 }
 
 type Task struct {
-	ID        uuid.UUID   `json:"id"`
-	UserID    uuid.UUID   `json:"user_id"`
-	Type      string      `json:"type"`
-	Payload   string      `json:"payload"`
-	Status    pgtype.Text `json:"status"`
-	Result    pgtype.Text `json:"result"`
-	DueTime   time.Time   `json:"due_time"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
+	ID          uuid.UUID      `json:"id"`
+	Title       string         `json:"title"`
+	Type        string         `json:"type"`
+	Description string         `json:"description"`
+	UserID      uuid.UUID      `json:"user_id"`
+	Priority    TaskPriority   `json:"priority"`
+	Payload     string         `json:"payload"`
+	Status      NullTaskStatus `json:"status"`
+	Result      pgtype.Text    `json:"result"`
+	DueTime     time.Time      `json:"due_time"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
 }
 
 type TaskLog struct {
 	ID        uuid.UUID   `json:"id"`
 	TaskID    uuid.UUID   `json:"task_id"`
 	WorkerID  pgtype.Text `json:"worker_id"`
-	Status    string      `json:"status"`
+	Status    TaskStatus  `json:"status"`
 	Message   pgtype.Text `json:"message"`
 	CreatedAt time.Time   `json:"created_at"`
 }
@@ -57,7 +191,7 @@ type User struct {
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
-	Role      string    `json:"role"`
+	Role      UserRole  `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

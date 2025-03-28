@@ -75,7 +75,7 @@ const docTemplate = `{
         },
         "/task": {
             "get": {
-                "description": "Get a list of tasks with pagination",
+                "description": "Get a list of all tasks with pagination. Supports filtering by passing ` + "`" + `user_id` + "`" + ` as a query parameter.",
                 "consumes": [
                     "application/json"
                 ],
@@ -85,7 +85,7 @@ const docTemplate = `{
                 "tags": [
                     "tasks"
                 ],
-                "summary": "Get Tasks",
+                "summary": "Get all created Tasks",
                 "parameters": [
                     {
                         "type": "integer",
@@ -108,7 +108,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/internal_server.TaskResponse"
+                                "$ref": "#/definitions/task-manager_internal_database_sqlc.Task"
                             }
                         }
                     },
@@ -153,7 +153,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/internal_server.TaskResponse"
+                            "$ref": "#/definitions/task-manager_internal_database_sqlc.Task"
                         }
                     },
                     "400": {
@@ -188,7 +188,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_server.TaskResponse"
+                            "$ref": "#/definitions/task-manager_internal_database_sqlc.Task"
                         }
                     },
                     "400": {
@@ -211,7 +211,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "put": {
+            "patch": {
                 "description": "Update the status of an existing task",
                 "consumes": [
                     "application/json"
@@ -238,7 +238,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_server.TaskResponse"
+                            "$ref": "#/definitions/task-manager_internal_database_sqlc.Task"
                         }
                     },
                     "400": {
@@ -315,7 +315,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "auth"
                 ],
                 "summary": "Login User",
                 "parameters": [
@@ -367,7 +367,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "auth"
                 ],
                 "summary": "Register User",
                 "parameters": [
@@ -421,6 +421,95 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/internal_server.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete User",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}/role": {
+            "patch": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update User Role",
+                "parameters": [
+                    {
+                        "description": "New Role",
+                        "name": "role",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.UpdateUserRoleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.Message"
                         }
                     },
                     "400": {
@@ -511,39 +600,6 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_server.TaskResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string",
-                    "example": "2025-03-25T12:00:00Z"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "Finish the pending project by Friday"
-                },
-                "due_date": {
-                    "type": "string",
-                    "example": "2025-03-30T12:00:00Z"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "pending"
-                },
-                "title": {
-                    "type": "string",
-                    "example": "Complete project"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2025-03-26T12:00:00Z"
-                }
-            }
-        },
         "internal_server.UpdateTaskRequest": {
             "type": "object",
             "properties": {
@@ -554,6 +610,17 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "completed"
+                }
+            }
+        },
+        "internal_server.UpdateUserRoleRequest": {
+            "type": "object",
+            "required": [
+                "role"
+            ],
+            "properties": {
+                "role": {
+                    "type": "string"
                 }
             }
         },
@@ -624,6 +691,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "John"
                 },
+                "role": {
+                    "type": "string",
+                    "example": "ADMIN"
+                },
                 "updated_at": {
                     "type": "string",
                     "example": "2025-01-02T12:00:00Z"
@@ -670,6 +741,96 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "pgtype.Text": {
+            "type": "object",
+            "properties": {
+                "string": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "task-manager_internal_database_sqlc.NullTaskStatus": {
+            "type": "object",
+            "properties": {
+                "task_status": {
+                    "$ref": "#/definitions/task-manager_internal_database_sqlc.TaskStatus"
+                },
+                "valid": {
+                    "description": "Valid is true if TaskStatus is not NULL",
+                    "type": "boolean"
+                }
+            }
+        },
+        "task-manager_internal_database_sqlc.Task": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "due_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "string"
+                },
+                "priority": {
+                    "$ref": "#/definitions/task-manager_internal_database_sqlc.TaskPriority"
+                },
+                "result": {
+                    "$ref": "#/definitions/pgtype.Text"
+                },
+                "status": {
+                    "$ref": "#/definitions/task-manager_internal_database_sqlc.NullTaskStatus"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "task-manager_internal_database_sqlc.TaskPriority": {
+            "type": "string",
+            "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+            ],
+            "x-enum-varnames": [
+                "TaskPriorityLOW",
+                "TaskPriorityMEDIUM",
+                "TaskPriorityHIGH"
+            ]
+        },
+        "task-manager_internal_database_sqlc.TaskStatus": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "IN-PROGRESS",
+                "FAILED"
+            ],
+            "x-enum-varnames": [
+                "TaskStatusPENDING",
+                "TaskStatusINPROGRESS",
+                "TaskStatusFAILED"
+            ]
         }
     }
 }`

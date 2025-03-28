@@ -80,6 +80,7 @@ func (h *Server) RenewAccessToken(ctx *gin.Context) {
 
 	accessToken, accessPayload, err := h.tokenMaker.CreateToken(
 		refreshPayload.UserID,
+		refreshPayload.Role,
 		h.config.ACCESS_TOKEN_DURATION,
 	)
 

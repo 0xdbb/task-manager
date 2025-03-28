@@ -2,6 +2,11 @@
 SELECT * FROM "task"
 WHERE id = $1;
 
+-- name: ListAllTasks :many
+SELECT * FROM "task"
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
+
 -- name: ListTasksByUser :many
 SELECT * FROM "task"
 WHERE user_id = $1
@@ -10,9 +15,9 @@ LIMIT $2 OFFSET $3;
 
 -- name: CreateTask :one
 INSERT INTO "task" (
-  user_id, type, payload, status, due_time
+  user_id, title, description, result, type, payload, status, due_time, priority
 ) VALUES (
-  $1, $2, $3, 'pending', $4
+  $1, $2, $3, $4, $5, $6, 'pending', $7, $8
 )
 RETURNING *;
 

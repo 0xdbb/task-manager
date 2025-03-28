@@ -14,9 +14,9 @@ import (
 
 // Task Types
 type CreateTaskRequest struct {
-	Type       string    `json:"title" binding:"required" example:"Complete project"`
+	Type    string    `json:"title" binding:"required" example:"Complete project"`
 	Payload string    `json:"payload" example:"Example payload"`
-	DueDate     time.Time `json:"due_date" example:"2025-03-30T12:00:00Z"`
+	DueDate time.Time `json:"due_date" example:"2025-03-30T12:00:00Z"`
 }
 
 type UpdateTaskRequest struct {
@@ -29,69 +29,45 @@ type TaskRequest struct {
 }
 
 type TasksRequest struct {
-	PageSize int32 `form:"page_size" binding:"required,min=1" example:"10"`
-	PageID   int32 `form:"page_id" binding:"required,min=1" example:"1"`
+	PageSize int32     `query:"page_size" binding:"required,min=1" example:"10"`
+	PageID   int32     `query:"page_id" binding:"required,min=1" example:"1"`
+	UserID   uuid.UUID `form:"query" example:"123e4567-e89b-12d3-a456-426614174000"`
 }
 
-// TaskResponse represents the response structure for tasks
-type TaskResponse struct {
-	ID          uuid.UUID `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Title       string    `json:"title" example:"Complete project"`
-	Description string    `json:"description" example:"Finish the pending project by Friday"`
-	Status      string    `json:"status" example:"pending"`
-	DueDate     time.Time `json:"due_date" example:"2025-03-30T12:00:00Z"`
-	CreatedAt   time.Time `json:"created_at" example:"2025-03-25T12:00:00Z"`
-	UpdatedAt   time.Time `json:"updated_at" example:"2025-03-26T12:00:00Z"`
-}
-
-func newTaskResponse(task db.Task) TaskResponse {
-	return TaskResponse{
-		ID:          task.ID,
-		Title:       task.Title,
-		Description: task.Description,
-		Status:      task.Status,
-		DueDate:     task.DueDate,
-		CreatedAt:   task.CreatedAt,
-		UpdatedAt:   task.UpdatedAt,
-	}
-}
-
-// @Summary		Get Tasks
-// @Description	Get a list of tasks with pagination
+// @Summary		Get all created Tasks
+// @Description	Get a list of all tasks with pagination. Supports filtering by passing `user_id` as a query parameter.
 // @Tags			tasks
 // @Accept			json
 // @Produce		json
 // @Param			page_size	query	int	true	"Page Size"
 // @Param			page_id		query	int	true	"Page Number"
-// @Success		200			{array}		TaskResponse
+// @Success		200			{array}		db.Task
 // @Failure		400			{object}	ErrorResponse
 // @Failure		500			{object}	ErrorResponse
 // @Router			/task [get]
 func (h *Server) GetTasks(ctx *gin.Context) {
-	var req TasksRequest
-
-	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request - missing page_id or page_size"))
+	if !isAdmin(ctx) {
 		return
 	}
 
-	arg := db.ListTasksParams{
+	var req TasksRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request"))
+		return
+	}
+
+	arg := db.ListAllTasksParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
-	tasks, err := h.db.ListTasks(ctx, arg)
+	tasks, err := h.db.ListAllTasks(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error retrieving tasks"))
 		return
 	}
 
-	var taskResponses []TaskResponse
-	for _, task := range tasks {
-		taskResponses = append(taskResponses, newTaskResponse(task))
-	}
-
-	ctx.JSON(http.StatusOK, taskResponses)
+	ctx.JSON(http.StatusOK, tasks)
 }
 
 // @Summary		Get Task
@@ -100,14 +76,17 @@ func (h *Server) GetTasks(ctx *gin.Context) {
 // @Accept			json
 // @Produce		json
 // @Param			id	path		uuid.UUID	true	"Task ID"
-// @Success		200	{object}	TaskResponse
+// @Success		200	{object}	db.Task
 // @Failure		400	{object}	ErrorResponse
 // @Failure		404	{object}	ErrorResponse
 // @Failure		500	{object}	ErrorResponse
 // @Router			/task/{id} [get]
 func (h *Server) GetTask(ctx *gin.Context) {
-	var taskReq TaskRequest
+	if !isAdmin(ctx) {
+		return
+	}
 
+	var taskReq TaskRequest
 	if err := ctx.ShouldBindUri(&taskReq); err != nil {
 		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid task ID"))
 		return
@@ -123,7 +102,7 @@ func (h *Server) GetTask(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, newTaskResponse(task))
+	ctx.JSON(http.StatusOK, task)
 }
 
 // @Summary		Create Task
@@ -132,24 +111,22 @@ func (h *Server) GetTask(ctx *gin.Context) {
 // @Accept			json
 // @Produce		json
 // @Param			request	body		CreateTaskRequest	true	"Create Task Request"
-// @Success		201		{object}	TaskResponse
+// @Success		201		{object}	db.Task
 // @Failure		400		{object}	ErrorResponse
 // @Failure		500		{object}	ErrorResponse
 // @Router			/task [post]
 func (h *Server) CreateTask(ctx *gin.Context) {
-	var task CreateTaskRequest
+	if !isAdmin(ctx) {
+		return
+	}
 
+	var task CreateTaskRequest
 	if err := ctx.ShouldBindJSON(&task); err != nil {
 		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request"))
 		return
 	}
 
-	// TODO: Apply authorization
-
 	taskArg := db.CreateTaskParams{
-		// UserID:  ,
-		// Type:  ,
-		// Payload: "",
 		DueTime: task.DueDate,
 	}
 
@@ -159,7 +136,7 @@ func (h *Server) CreateTask(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, newTaskResponse(createdTask))
+	ctx.JSON(http.StatusCreated, createdTask)
 }
 
 // @Summary		Update Task Status
@@ -169,11 +146,15 @@ func (h *Server) CreateTask(ctx *gin.Context) {
 // @Produce		json
 // @Param			id		path		uuid.UUID			true	"Task ID"
 // @Param			request	body		UpdateTaskRequest	true	"Update Task Request"
-// @Success		200		{object}	TaskResponse
+// @Success		200		{object}	db.Task
 // @Failure		400		{object}	ErrorResponse
 // @Failure		500		{object}	ErrorResponse
-// @Router			/task/{id} [put]
+// @Router			/task/{id} [patch]
 func (h *Server) UpdateTaskStatus(ctx *gin.Context) {
+	if !isAdmin(ctx) {
+		return
+	}
+
 	var taskReq TaskRequest
 	var update UpdateTaskRequest
 
@@ -188,8 +169,11 @@ func (h *Server) UpdateTaskStatus(ctx *gin.Context) {
 	}
 
 	taskArg := db.UpdateTaskStatusParams{
-		ID:     taskReq.ID,
-		Status: toPgTypeText(update.Status),
+		ID: taskReq.ID,
+		Status: db.NullTaskStatus{
+			TaskStatus: db.TaskStatus(update.Status),
+			Valid:      true,
+		},
 		Result: toPgTypeText(update.Result),
 	}
 
@@ -199,13 +183,11 @@ func (h *Server) UpdateTaskStatus(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, newTaskResponse(task))
+	ctx.JSON(http.StatusOK, task)
 }
-
 func toPgTypeText(text string) pgtype.Text {
 	return pgtype.Text{
 		String: text,
 		Valid:  text != "",
 	}
-
 }

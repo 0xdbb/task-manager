@@ -38,14 +38,17 @@ func NewServer(config *config.Config) (*http.Server, error) {
 
 	gin.SetMode(mode)
 
+	// ----Create JWT Maker-----
 	tokenMaker, err := token.NewJWTMaker(config.TOKEN_SECRET)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error creating token maker %w", err)
 	}
 
+	// ----Create Database Service
 	newService := db.NewService(dburl)
 
+	// ----- NewServer -----
 	NewServer := &Server{
 
 		engine: gin.Default(),
@@ -61,6 +64,7 @@ func NewServer(config *config.Config) (*http.Server, error) {
 		v.RegisterValidation("StrongPassword", StrongPassword)
 	}
 
+	// -----Set CORS----
 	NewServer.Cors()
 
 	NewServer.RegisterRoutes()

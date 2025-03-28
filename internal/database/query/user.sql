@@ -9,16 +9,15 @@ LIMIT $1 OFFSET $2;
 
 -- name: CreateUser :one
 INSERT INTO "user" (
-     name, email, password, role
+    name, email, password, role
 ) VALUES (
   $1, $2, $3, $4
 )
 RETURNING *;
 
--- name: UpdateUser :one
+-- name: UpdateUserRole :one
 UPDATE "user"
-SET name = $2,
-    role = $3,
+SET role = $2,
     updated_at = now()
 WHERE id = $1
 RETURNING *;
