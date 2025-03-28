@@ -1,17 +1,19 @@
--- name: GetNotification :one
-SELECT * FROM "notification"
-WHERE id = $1;
-
--- name: ListNotificationsForUser :many
+-- name: ListUserNotifications :many
 SELECT * FROM "notification"
 WHERE user_id = $1
-ORDER BY created_at DESC
-LIMIT $2 OFFSET $3;
+ORDER BY created_at DESC;
 
--- name: CreateNotification :one
-INSERT INTO "notification" (user_id, message, sent_at)
-VALUES ($1, $2, now())
-RETURNING *;
+-- name: CreateNotification :exec
+INSERT INTO "notification" (
+  user_id, task_id, message
+) VALUES (
+  $1, $2, $3
+);
+
+-- name: MarkNotificationAsRead :exec
+UPDATE "notification"
+SET read = true
+WHERE id = $1;
 
 -- name: DeleteNotification :exec
 DELETE FROM "notification"

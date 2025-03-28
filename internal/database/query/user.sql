@@ -5,22 +5,20 @@ WHERE id = $1;
 -- name: ListUsers :many
 SELECT id,  email 
 FROM "user"
-ORDER BY id
 LIMIT $1 OFFSET $2;
 
 -- name: CreateUser :one
 INSERT INTO "user" (
-     name,email, password 
+     name, email, password, role
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 )
 RETURNING *;
 
 -- name: UpdateUser :one
 UPDATE "user"
 SET name = $2,
-    type = $3,
-    phone = $4,
+    role = $3,
     updated_at = now()
 WHERE id = $1
 RETURNING *;

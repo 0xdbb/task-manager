@@ -12,29 +12,23 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createNotification = `-- name: CreateNotification :one
-INSERT INTO "notification" (user_id, message, sent_at)
-VALUES ($1, $2, now())
-RETURNING id, user_id, message, sent_at, created_at, updated_at
+const createNotification = `-- name: CreateNotification :exec
+INSERT INTO "notification" (
+  user_id, task_id, message
+) VALUES (
+  $1, $2, $3
+)
 `
 
 type CreateNotificationParams struct {
-	UserID  uuid.UUID   `json:"user_id"`
+	UserID  pgtype.UUID `json:"user_id"`
+	TaskID  pgtype.UUID `json:"task_id"`
 	Message pgtype.Text `json:"message"`
 }
 
-func (q *Queries) CreateNotification(ctx context.Context, arg CreateNotificationParams) (Notification, error) {
-	row := q.db.QueryRow(ctx, createNotification, arg.UserID, arg.Message)
-	var i Notification
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Message,
-		&i.SentAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) CreateNotification(ctx context.Context, arg CreateNotificationParams) error {
+	_, err := q.db.Exec(ctx, createNotification, arg.UserID, arg.TaskID, arg.Message)
+	return err
 }
 
 const deleteNotification = `-- name: DeleteNotification :exec
@@ -47,40 +41,14 @@ func (q *Queries) DeleteNotification(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-const getNotification = `-- name: GetNotification :one
-SELECT id, user_id, message, sent_at, created_at, updated_at FROM "notification"
-WHERE id = $1
-`
-
-func (q *Queries) GetNotification(ctx context.Context, id uuid.UUID) (Notification, error) {
-	row := q.db.QueryRow(ctx, getNotification, id)
-	var i Notification
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Message,
-		&i.SentAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const listNotificationsForUser = `-- name: ListNotificationsForUser :many
-SELECT id, user_id, message, sent_at, created_at, updated_at FROM "notification"
+const listUserNotifications = `-- name: ListUserNotifications :many
+SELECT id, user_id, task_id, message, read, created_at FROM "notification"
 WHERE user_id = $1
 ORDER BY created_at DESC
-LIMIT $2 OFFSET $3
 `
 
-type ListNotificationsForUserParams struct {
-	UserID uuid.UUID `json:"user_id"`
-	Limit  int32     `json:"limit"`
-	Offset int32     `json:"offset"`
-}
-
-func (q *Queries) ListNotificationsForUser(ctx context.Context, arg ListNotificationsForUserParams) ([]Notification, error) {
-	rows, err := q.db.Query(ctx, listNotificationsForUser, arg.UserID, arg.Limit, arg.Offset)
+func (q *Queries) ListUserNotifications(ctx context.Context, userID pgtype.UUID) ([]Notification, error) {
+	rows, err := q.db.Query(ctx, listUserNotifications, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -91,10 +59,10 @@ func (q *Queries) ListNotificationsForUser(ctx context.Context, arg ListNotifica
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.TaskID,
 			&i.Message,
-			&i.SentAt,
+			&i.Read,
 			&i.CreatedAt,
-			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -104,4 +72,15 @@ func (q *Queries) ListNotificationsForUser(ctx context.Context, arg ListNotifica
 		return nil, err
 	}
 	return items, nil
+}
+
+const markNotificationAsRead = `-- name: MarkNotificationAsRead :exec
+UPDATE "notification"
+SET read = true
+WHERE id = $1
+`
+
+func (q *Queries) MarkNotificationAsRead(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, markNotificationAsRead, id)
+	return err
 }

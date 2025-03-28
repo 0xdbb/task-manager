@@ -25,7 +25,6 @@ func (s *Server) UserRoutes(v1 *gin.RouterGroup) {
 	{
 		userRouteGroup.GET("/", s.GetUsers)
 		userRouteGroup.GET("/:id", s.GetUser)
-		userRouteGroup.PUT("/:id", s.UpdateUser)
 		userRouteGroup.POST("/login", s.Login)
 		userRouteGroup.POST("/register", s.Register)
 	}

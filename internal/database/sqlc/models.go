@@ -11,72 +11,13 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Category struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
 type Notification struct {
-	ID        uuid.UUID   `json:"id"`
-	UserID    uuid.UUID   `json:"user_id"`
-	Message   pgtype.Text `json:"message"`
-	SentAt    time.Time   `json:"sent_at"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
-}
-
-type Order struct {
-	ID           uuid.UUID        `json:"id"`
-	UserID       uuid.UUID        `json:"user_id"`
-	Status       string           `json:"status"`
-	DeliveryDate pgtype.Date      `json:"delivery_date"`
-	CreatedAt    pgtype.Timestamp `json:"created_at"`
-	UpdatedAt    pgtype.Timestamp `json:"updated_at"`
-}
-
-type OrderItem struct {
-	ID         uuid.UUID      `json:"id"`
-	OrderID    uuid.UUID      `json:"order_id"`
-	ProductID  uuid.UUID      `json:"product_id"`
-	Quantity   int32          `json:"quantity"`
-	TotalPrice pgtype.Numeric `json:"total_price"`
-	CreatedAt  time.Time      `json:"created_at"`
-	UpdatedAt  time.Time      `json:"updated_at"`
-}
-
-type Payment struct {
-	ID            uuid.UUID      `json:"id"`
-	OrderID       uuid.UUID      `json:"order_id"`
-	Amount        pgtype.Numeric `json:"amount"`
-	PaymentMethod pgtype.Text    `json:"payment_method"`
-	PaymentDate   time.Time      `json:"payment_date"`
-	CreatedAt     time.Time      `json:"created_at"`
-	UpdatedAt     time.Time      `json:"updated_at"`
-}
-
-type Product struct {
-	ID          uuid.UUID      `json:"id"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	ImageUrl    string         `json:"image_url"`
-	CategoryID  uuid.UUID      `json:"category_id"`
-	Price       pgtype.Numeric `json:"price"`
-	Stock       int32          `json:"stock"`
-	StoreID     uuid.UUID      `json:"store_id"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-}
-
-type Review struct {
-	ID        uuid.UUID   `json:"id"`
-	UserID    uuid.UUID   `json:"user_id"`
-	ProductID uuid.UUID   `json:"product_id"`
-	Rating    pgtype.Int4 `json:"rating"`
-	Comment   pgtype.Text `json:"comment"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
+	ID        uuid.UUID        `json:"id"`
+	UserID    pgtype.UUID      `json:"user_id"`
+	TaskID    pgtype.UUID      `json:"task_id"`
+	Message   pgtype.Text      `json:"message"`
+	Read      pgtype.Bool      `json:"read"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
 type Session struct {
@@ -90,43 +31,32 @@ type Session struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
-type SocialMedia struct {
-	ID        uuid.UUID   `json:"id"`
-	UserID    uuid.UUID   `json:"user_id"`
-	Platform  pgtype.Text `json:"platform"`
-	Link      pgtype.Text `json:"link"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
+type Task struct {
+	ID        uuid.UUID        `json:"id"`
+	UserID    uuid.UUID        `json:"user_id"`
+	Type      string           `json:"type"`
+	Payload   string           `json:"payload"`
+	Status    pgtype.Text      `json:"status"`
+	Result    pgtype.Text      `json:"result"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+	UpdatedAt pgtype.Timestamp `json:"updated_at"`
 }
 
-type Store struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Address     string    `json:"address"`
-	City        string    `json:"city"`
-	Description string    `json:"description"`
-	AdminID     uuid.UUID `json:"admin_id"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-}
-
-type Testimonial struct {
-	ID        uuid.UUID   `json:"id"`
-	UserID    uuid.UUID   `json:"user_id"`
-	Message   pgtype.Text `json:"message"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
+type TaskLog struct {
+	ID        uuid.UUID        `json:"id"`
+	TaskID    uuid.UUID        `json:"task_id"`
+	WorkerID  pgtype.Text      `json:"worker_id"`
+	Status    string           `json:"status"`
+	Message   pgtype.Text      `json:"message"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
 type User struct {
-	ID          uuid.UUID `json:"id"`
-	FirstName   string    `json:"first_name"`
-	LastName    string    `json:"last_name"`
-	Email       string    `json:"email"`
-	Password    string    `json:"password"`
-	Phone       string    `json:"phone"`
-	Address     string    `json:"address"`
-	DateOfBirth string    `json:"date_of_birth"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	Role      string    `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

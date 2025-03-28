@@ -7,7 +7,7 @@ CREATE TABLE "user" (
   "name" VARCHAR NOT NULL CHECK (LENGTH(name) > 0),
   "email" VARCHAR UNIQUE NOT NULL,
   "password" VARCHAR NOT NULL,
-  "type" VARCHAR(20) NOT NULL,
+  "role" VARCHAR(20) NOT NULL,
   "created_at" TIMESTAMPTZ DEFAULT now(),
   "updated_at" TIMESTAMPTZ DEFAULT now()
 );

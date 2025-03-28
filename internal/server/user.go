@@ -14,21 +14,9 @@ import (
 
 // Users types
 type CreateUserRequest struct {
-	FirstName   string `json:"first_name" binding:"required" example:"John"`
-	LastName    string `json:"last_name" binding:"required" example:"Doe"`
-	Password    string `json:"password" binding:"required,min=6,StrongPassword" example:"password123"`
-	Email       string `json:"email" binding:"required" example:"john.doe@example.com"`
-	Address     string `json:"address" binding:"required" example:"123 Main St, New York, NY 10001"`
-	Phone       string `json:"phone" binding:"required" example:"+1 123-456-7890"`
-	DateOfBirth string `json:"date_of_birth" example:"2000-01-01"`
-}
-
-type UpdateUserRequest struct {
-	FirstName   string `json:"first_name" example:"John"`
-	LastName    string `json:"last_name" example:"Doe"`
-	Address     string `json:"address" example:"123 Main St, New York, NY 10001"`
-	Phone       string `json:"phone" example:"+1 123-456-7890"`
-	DateOfBirth string `json:"date_of_birth" example:"2000-01-01"`
+	Name     string `json:"name" binding:"required" example:"John"`
+	Password string `json:"password" binding:"required,min=6,StrongPassword" example:"password123"`
+	Email    string `json:"email" binding:"required" example:"john.doe@example.com"`
 }
 
 type UserRequest struct {
@@ -56,11 +44,8 @@ type UserLoginResponse struct {
 
 type UserResponse struct {
 	ID        uuid.UUID `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	FirstName string    `json:"first_name" example:"John"`
-	LastName  string    `json:"last_name" example:"Doe"`
+	Name      string    `json:"name" binding:"required" example:"John"`
 	Email     string    `json:"email" example:"john.doe@example.com"`
-	Address   string    `json:"address" example:"123 Main St, New York, NY 10001"`
-	Phone     string    `json:"phone" example:"+1 123-456-7890"`
 	CreatedAt time.Time `json:"created_at" example:"2025-01-01T12:00:00Z"`
 	UpdatedAt time.Time `json:"updated_at" example:"2025-01-02T12:00:00Z"`
 }
@@ -68,11 +53,8 @@ type UserResponse struct {
 func newUserResponse(user db.User) UserResponse {
 	return UserResponse{
 		ID:        user.ID,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
+		Name:      user.Name,
 		Email:     user.Email,
-		Address:   user.Address,
-		Phone:     user.Phone,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}
@@ -144,50 +126,6 @@ func (h *Server) GetUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, newUserResponse(user))
 }
 
-// @Summary		Update User
-// @Description	Update user by ID
-// @Tags			users
-// @Accept			json
-// @Produce		json
-// @Param			id	path		int	true	"User ID"
-// @Success		200	{object}	UserResponse
-// @Failure		400	{object}	ErrorResponse
-// @Failure		404	{object}	ErrorResponse
-// @Failure		500	{object}	ErrorResponse
-// @Router			/user/{id} [put]
-func (h *Server) UpdateUser(ctx *gin.Context) {
-	var user UpdateUserRequest
-
-	userID := ctx.Param("id")
-
-	if err := ctx.ShouldBindJSON(&user); err != nil {
-		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request"))
-		return
-	}
-
-	id, err := uuid.Parse(userID)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request"))
-		return
-	}
-
-	updatedUser, err := h.db.UpdateUser(ctx, db.UpdateUserParams{
-		ID:          id,
-		FirstName:   user.FirstName,
-		LastName:    user.LastName,
-		Address:     user.Address,
-		DateOfBirth: user.DateOfBirth,
-		Phone:       user.Phone,
-	})
-
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error updating user"))
-		return
-	}
-
-	ctx.JSON(http.StatusOK, newUserResponse(updatedUser))
-}
-
 // @Summary		Register User
 // @Description	Register a new user
 // @Tags			users
@@ -213,19 +151,15 @@ func (h *Server) Register(ctx *gin.Context) {
 	}
 
 	userArg := db.CreateUserParams{
-		FirstName:   user.FirstName,
-		LastName:    user.LastName,
-		Email:       user.Email,
-		Password:    passwordHash,
-		Address:     user.Address,
-		Phone:       user.Phone,
-		DateOfBirth: user.DateOfBirth,
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: passwordHash,
 	}
 
 	_, err = h.db.CreateUser(ctx, userArg)
 	if err != nil {
 		if db.ErrorCode(err) == db.UniqueViolation {
-			ctx.JSON(http.StatusForbidden, HandleError(err, http.StatusForbidden, "User with email already exists"))
+			ctx.JSON(http.StatusForbidden, HandleError(err, http.StatusForbidden, "User with specified email already exists"))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error creating user"))
