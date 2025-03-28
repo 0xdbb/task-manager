@@ -19,8 +19,9 @@ CREATE TABLE "task" (
   "payload" TEXT NOT NULL,
   "status" VARCHAR(20) DEFAULT 'pending',
   "result" TEXT,
-  "created_at" TIMESTAMP DEFAULT now(),
-  "updated_at" TIMESTAMP,
+  "due_time" TIMESTAMPTZ NOT NULL, 
+  "created_at" TIMESTAMPTZ DEFAULT now(),
+  "updated_at" TIMESTAMPTZ,
   FOREIGN KEY ("user_id") REFERENCES "user" ("id")
 );
 
@@ -30,7 +31,7 @@ CREATE TABLE "task_log" (
   "worker_id" VARCHAR(100),
   "status" VARCHAR(20) NOT NULL,
   "message" TEXT,
-  "created_at" TIMESTAMP DEFAULT now(),
+  "created_at" TIMESTAMPTZ DEFAULT now(),
   FOREIGN KEY ("task_id") REFERENCES "task" ("id")
 );
 
@@ -40,7 +41,7 @@ CREATE TABLE "notification" (
   "task_id" UUID,
   "message" VARCHAR(255),
   "read" BOOLEAN DEFAULT false,
-  "created_at" TIMESTAMP DEFAULT now(),
+  "created_at" TIMESTAMPTZ DEFAULT now(),
   FOREIGN KEY ("user_id") REFERENCES "user" ("id"),
   FOREIGN KEY ("task_id") REFERENCES "task" ("id")
 );

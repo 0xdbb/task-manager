@@ -13,6 +13,9 @@ sql:
       emit_empty_slices: true
       emit_exact_table_names: true
       overrides:
+        - column: "task.due_time"
+          go_type: "time.Time"
+          nullable: false
         - db_type: "timestamptz"
           go_type: "time.Time"
           nullable: true

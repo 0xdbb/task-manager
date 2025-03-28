@@ -1,100 +1,36 @@
 definitions:
-  big.Int:
-    type: object
-  internal_server_handler.CategoryResponse:
+  internal_server.CreateTaskRequest:
     properties:
-      created_at:
-        example: "2025-01-01T12:00:00Z"
+      due_date:
+        example: "2025-03-30T12:00:00Z"
         type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
+      payload:
+        example: Example payload
         type: string
-      name:
-        example: Electronics
-        type: string
-      updated_at:
-        example: "2025-01-02T12:00:00Z"
-        type: string
-    type: object
-  internal_server_handler.CreateCategoryRequest:
-    properties:
-      name:
-        example: Electronics
+      title:
+        example: Complete project
         type: string
     required:
-    - name
+    - title
     type: object
-  internal_server_handler.CreateProductRequest:
+  internal_server.CreateUserRequest:
     properties:
-      category_id:
-        example: 223e4567-e89b-12d3-a456-426614174001
-        type: string
-      description:
-        example: High-performance gaming laptop
-        type: string
-      name:
-        example: Laptop
-        type: string
-      price:
-        $ref: '#/definitions/pgtype.Numeric'
-      store_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-    required:
-    - category_id
-    - name
-    - price
-    - store_id
-    type: object
-  internal_server_handler.CreateStoreRequest:
-    properties:
-      address:
-        example: 123 Market St, Accra
-        type: string
-      city:
-        example: Accra
-        type: string
-      name:
-        example: BestMart
-        type: string
-    required:
-    - address
-    - city
-    - name
-    type: object
-  internal_server_handler.CreateUserRequest:
-    properties:
-      address:
-        example: 123 Main St, New York, NY 10001
-        type: string
-      date_of_birth:
-        example: "2000-01-01"
-        type: string
       email:
         example: john.doe@example.com
         type: string
-      first_name:
+      name:
         example: John
-        type: string
-      last_name:
-        example: Doe
         type: string
       password:
         example: password123
         minLength: 6
         type: string
-      phone:
-        example: +1 123-456-7890
-        type: string
     required:
-    - address
     - email
-    - first_name
-    - last_name
+    - name
     - password
-    - phone
     type: object
-  internal_server_handler.ErrorResponse:
+  internal_server.ErrorResponse:
     properties:
       code:
         type: integer
@@ -103,122 +39,45 @@ definitions:
       status:
         type: string
     type: object
-  internal_server_handler.Message:
+  internal_server.Message:
     properties:
       message:
         type: string
     type: object
-  internal_server_handler.ProductResponse:
+  internal_server.TaskResponse:
     properties:
-      category_id:
-        example: 223e4567-e89b-12d3-a456-426614174001
-        type: string
       created_at:
-        example: "2025-01-01T12:00:00Z"
+        example: "2025-03-25T12:00:00Z"
         type: string
       description:
-        example: High-performance gaming laptop
+        example: Finish the pending project by Friday
+        type: string
+      due_date:
+        example: "2025-03-30T12:00:00Z"
         type: string
       id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      image_url:
-        example: https://product-image.jpg
+      status:
+        example: pending
         type: string
-      name:
-        example: Laptop
-        type: string
-      price:
-        $ref: '#/definitions/pgtype.Numeric'
-      stock:
-        example: 20
-        type: integer
-      store_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
+      title:
+        example: Complete project
         type: string
       updated_at:
-        example: "2025-01-02T12:00:00Z"
+        example: "2025-03-26T12:00:00Z"
         type: string
     type: object
-  internal_server_handler.ProductsRequest:
+  internal_server.UpdateTaskRequest:
     properties:
-      page_id:
-        example: 1
-        minimum: 1
-        type: integer
-      page_size:
-        example: 10
-        minimum: 1
-        type: integer
-    required:
-    - page_id
-    - page_size
-    type: object
-  internal_server_handler.StoreResponse:
-    properties:
-      address:
-        example: 123 Market St, Accra
+      result:
+        example: "2025-04-01T12:00:00Z"
         type: string
-      city:
-        example: Accra
-        type: string
-      created_at:
-        example: "2025-01-01T12:00:00Z"
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      name:
-        example: BestMart
-        type: string
-      updated_at:
-        example: "2025-01-02T12:00:00Z"
+      status:
+        example: completed
         type: string
     type: object
-  internal_server_handler.StoresRequest:
-    properties:
-      page_id:
-        example: 1
-        minimum: 1
-        type: integer
-      page_size:
-        example: 10
-        minimum: 1
-        type: integer
-    required:
-    - page_id
-    - page_size
-    type: object
-  internal_server_handler.UpdateCategoryRequest:
-    properties:
-      name:
-        example: Updated Electronics
-        type: string
-    required:
-    - name
-    type: object
-  internal_server_handler.UpdateProductRequest:
-    type: object
-  internal_server_handler.UpdateStoreRequest:
-    properties:
-      address:
-        example: 123 Market St, Accra
-        type: string
-      city:
-        example: Accra
-        type: string
-      description:
-        example: BestMart is a leading store in Accra
-        type: string
-      name:
-        example: BestMart
-        type: string
-    required:
-    - address
-    - city
-    - name
-    type: object
-  internal_server_handler.UserLoginRequest:
+  internal_server.UserLoginRequest:
     properties:
       email:
         example: john.doe@example.com
@@ -230,7 +89,7 @@ definitions:
     - email
     - password
     type: object
-  internal_server_handler.UserLoginResponse:
+  internal_server.UserLoginResponse:
     properties:
       access_token:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
@@ -248,90 +107,60 @@ definitions:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
       user:
-        $ref: '#/definitions/internal_server_handler.UserResponse'
+        $ref: '#/definitions/internal_server.UserResponse'
     type: object
-  internal_server_handler.UserResponse:
+  internal_server.UserResponse:
     properties:
-      address:
-        example: 123 Main St, New York, NY 10001
-        type: string
       created_at:
         example: "2025-01-01T12:00:00Z"
         type: string
       email:
         example: john.doe@example.com
         type: string
-      first_name:
-        example: John
-        type: string
       id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
-      last_name:
-        example: Doe
-        type: string
-      phone:
-        example: +1 123-456-7890
+      name:
+        example: John
         type: string
       updated_at:
         example: "2025-01-02T12:00:00Z"
         type: string
+    required:
+    - name
     type: object
-  internal_server_handler.UsersRequest:
+  internal_server.UsersRequest:
     properties:
-      page_id:
+      pageID:
         example: 1
         minimum: 1
         type: integer
-      page_size:
+      pageSize:
         example: 10
         minimum: 1
         type: integer
     required:
-    - page_id
-    - page_size
+    - pageID
+    - pageSize
     type: object
-  internal_server_handler.renewAccessTokenRequest:
+  internal_server.renewAccessTokenRequest:
     properties:
       refresh_token:
         type: string
     required:
     - refresh_token
     type: object
-  internal_server_handler.renewAccessTokenResponse:
+  internal_server.renewAccessTokenResponse:
     properties:
       access_token:
         type: string
       access_token_expires_at:
         type: string
     type: object
-  pgtype.InfinityModifier:
-    enum:
-    - 1
-    - 0
-    - -1
-    type: integer
-    x-enum-varnames:
-    - Infinity
-    - Finite
-    - NegativeInfinity
-  pgtype.Numeric:
-    properties:
-      exp:
-        type: integer
-      infinityModifier:
-        $ref: '#/definitions/pgtype.InfinityModifier'
-      int:
-        $ref: '#/definitions/big.Int'
-      naN:
-        type: boolean
-      valid:
-        type: boolean
-    type: object
 info:
   contact: {}
   description: API documentation for CheapStores Service
-  title: cheapstores-service API
+  title: task-manager API
   version: "1.0"
 paths:
   /auth/renew:
@@ -345,38 +174,49 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/internal_server_handler.renewAccessTokenRequest'
+          $ref: '#/definitions/internal_server.renewAccessTokenRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_server_handler.renewAccessTokenResponse'
+            $ref: '#/definitions/internal_server.renewAccessTokenResponse'
         "400":
           description: Invalid request
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "401":
           description: Unauthorized or Invalid token
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "404":
           description: Session not found
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
       summary: Renew Access Token
       tags:
       - auth
-  /category:
+  /task:
     get:
       consumes:
       - application/json
-      description: Get a list of categories
+      description: Get a list of tasks with pagination
+      parameters:
+      - description: Page Size
+        in: query
+        name: page_size
+        required: true
+        type: integer
+      - description: Page Number
+        in: query
+        name: page_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -384,500 +224,104 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/internal_server_handler.CategoryResponse'
+              $ref: '#/definitions/internal_server.TaskResponse'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Get Categories
+            $ref: '#/definitions/internal_server.ErrorResponse'
+      summary: Get Tasks
       tags:
-      - categories
+      - tasks
     post:
       consumes:
       - application/json
-      description: Create a new category
+      description: Create a new task
       parameters:
-      - description: Create Category Request
+      - description: Create Task Request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_server_handler.CreateCategoryRequest'
+          $ref: '#/definitions/internal_server.CreateTaskRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/internal_server_handler.CategoryResponse'
+            $ref: '#/definitions/internal_server.TaskResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Create Category
+            $ref: '#/definitions/internal_server.ErrorResponse'
+      summary: Create Task
       tags:
-      - categories
-  /category/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a category by ID
-      parameters:
-      - description: Category ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_server_handler.Message'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Delete Category
-      tags:
-      - categories
+      - tasks
+  /task/{id}:
     get:
       consumes:
       - application/json
-      description: Get category by ID
-      parameters:
-      - description: Category ID
-        in: path
-        name: id
-        required: true
-        type: string
+      description: Get task by ID
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_server_handler.CategoryResponse'
+            $ref: '#/definitions/internal_server.TaskResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Get Category
+            $ref: '#/definitions/internal_server.ErrorResponse'
+      summary: Get Task
       tags:
-      - categories
+      - tasks
     put:
       consumes:
       - application/json
-      description: Update an existing category
+      description: Update the status of an existing task
       parameters:
-      - description: Category ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Update Category Request
+      - description: Update Task Request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_server_handler.UpdateCategoryRequest'
+          $ref: '#/definitions/internal_server.UpdateTaskRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_server_handler.CategoryResponse'
+            $ref: '#/definitions/internal_server.TaskResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Update Category
+            $ref: '#/definitions/internal_server.ErrorResponse'
+      summary: Update Task Status
       tags:
-      - categories
-  /product:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of products
-      parameters:
-      - description: Products Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_server_handler.ProductsRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/internal_server_handler.ProductResponse'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Get Products
-      tags:
-      - products
-  /product/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get product by ID
-      parameters:
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_server_handler.ProductResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Get Product
-      tags:
-      - products
-  /products:
-    post:
-      consumes:
-      - application/json
-      description: Add a new product to a store
-      parameters:
-      - description: Create Product Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_server_handler.CreateProductRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/internal_server_handler.ProductResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Create Product
-      tags:
-      - products
-  /products/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Remove a product from the store
-      parameters:
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_server_handler.Message'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Delete Product
-      tags:
-      - products
-    patch:
-      consumes:
-      - application/json
-      description: Modify product stock of a product
-      parameters:
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Update Product Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_server_handler.UpdateProductRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_server_handler.ProductResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Update Product Stock
-      tags:
-      - products
-    put:
-      consumes:
-      - application/json
-      description: Modify product details
-      parameters:
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Update Product Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_server_handler.UpdateProductRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_server_handler.ProductResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Update Product
-      tags:
-      - products
-  /store:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of stores belonging to a user
-      parameters:
-      - description: Stores Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_server_handler.StoresRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/internal_server_handler.StoreResponse'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Get User Stores
-      tags:
-      - stores
-    post:
-      consumes:
-      - application/json
-      description: Create a new store
-      parameters:
-      - description: Create Store Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_server_handler.CreateStoreRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_server_handler.Message'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Create Store
-      tags:
-      - stores
-  /store/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get store by ID
-      parameters:
-      - description: Store ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_server_handler.StoreResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Get Store
-      tags:
-      - stores
-  /stores/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Remove a store from the system
-      parameters:
-      - description: Store ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_server_handler.Message'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Delete Store
-      tags:
-      - stores
-    put:
-      consumes:
-      - application/json
-      description: Update store details
-      parameters:
-      - description: Store ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Update Store Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_server_handler.UpdateStoreRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_server_handler.StoreResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Update Store
-      tags:
-      - stores
+      - tasks
   /user:
     get:
       consumes:
@@ -889,7 +333,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_server_handler.UsersRequest'
+          $ref: '#/definitions/internal_server.UsersRequest'
       produces:
       - application/json
       responses:
@@ -897,16 +341,16 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/internal_server_handler.UserResponse'
+              $ref: '#/definitions/internal_server.UserResponse'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
       summary: Get Users
       tags:
       - users
@@ -915,64 +359,26 @@ paths:
       consumes:
       - application/json
       description: Get user by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_server_handler.UserResponse'
+            $ref: '#/definitions/internal_server.UserResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
       summary: Get User
-      tags:
-      - users
-    put:
-      consumes:
-      - application/json
-      description: Update user by ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_server_handler.UserResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
-      summary: Update User
       tags:
       - users
   /user/login:
@@ -986,26 +392,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_server_handler.UserLoginRequest'
+          $ref: '#/definitions/internal_server.UserLoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_server_handler.UserLoginResponse'
+            $ref: '#/definitions/internal_server.UserLoginResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
       summary: Login User
       tags:
       - users
@@ -1020,22 +426,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_server_handler.CreateUserRequest'
+          $ref: '#/definitions/internal_server.CreateUserRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_server_handler.Message'
+            $ref: '#/definitions/internal_server.Message'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/internal_server_handler.ErrorResponse'
+            $ref: '#/definitions/internal_server.ErrorResponse'
       summary: Register User
       tags:
       - users

@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.renewAccessTokenRequest"
+                            "$ref": "#/definitions/internal_server.renewAccessTokenRequest"
                         }
                     }
                 ],
@@ -43,39 +43,39 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.renewAccessTokenResponse"
+                            "$ref": "#/definitions/internal_server.renewAccessTokenResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid request",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized or Invalid token",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Session not found",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/category": {
+        "/task": {
             "get": {
-                "description": "Get a list of categories",
+                "description": "Get a list of tasks with pagination",
                 "consumes": [
                     "application/json"
                 ],
@@ -83,35 +83,51 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "tasks"
                 ],
-                "summary": "Get Categories",
+                "summary": "Get Tasks",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "page_size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Number",
+                        "name": "page_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/internal_server_handler.CategoryResponse"
+                                "$ref": "#/definitions/internal_server.TaskResponse"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create a new category",
+                "description": "Create a new task",
                 "consumes": [
                     "application/json"
                 ],
@@ -119,17 +135,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "tasks"
                 ],
-                "summary": "Create Category",
+                "summary": "Create Task",
                 "parameters": [
                     {
-                        "description": "Create Category Request",
+                        "description": "Create Task Request",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.CreateCategoryRequest"
+                            "$ref": "#/definitions/internal_server.CreateTaskRequest"
                         }
                     }
                 ],
@@ -137,27 +153,27 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.CategoryResponse"
+                            "$ref": "#/definitions/internal_server.TaskResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/category/{id}": {
+        "/task/{id}": {
             "get": {
-                "description": "Get category by ID",
+                "description": "Get task by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -165,47 +181,38 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "tasks"
                 ],
-                "summary": "Get Category",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Category ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Get Task",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.CategoryResponse"
+                            "$ref": "#/definitions/internal_server.TaskResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     }
                 }
             },
             "put": {
-                "description": "Update an existing category",
+                "description": "Update the status of an existing task",
                 "consumes": [
                     "application/json"
                 ],
@@ -213,24 +220,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "tasks"
                 ],
-                "summary": "Update Category",
+                "summary": "Update Task Status",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Category ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Update Category Request",
+                        "description": "Update Task Request",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.UpdateCategoryRequest"
+                            "$ref": "#/definitions/internal_server.UpdateTaskRequest"
                         }
                     }
                 ],
@@ -238,602 +238,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.CategoryResponse"
+                            "$ref": "#/definitions/internal_server.TaskResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a category by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "categories"
-                ],
-                "summary": "Delete Category",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Category ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.Message"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/product": {
-            "get": {
-                "description": "Get a list of products",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Get Products",
-                "parameters": [
-                    {
-                        "description": "Products Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ProductsRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/internal_server_handler.ProductResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/product/{id}": {
-            "get": {
-                "description": "Get product by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Get Product",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ProductResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/products": {
-            "post": {
-                "description": "Add a new product to a store",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Create Product",
-                "parameters": [
-                    {
-                        "description": "Create Product Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.CreateProductRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ProductResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/products/{id}": {
-            "put": {
-                "description": "Modify product details",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Update Product",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Update Product Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.UpdateProductRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ProductResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Remove a product from the store",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Delete Product",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.Message"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Modify product stock of a product",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "Update Product Stock",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Update Product Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.UpdateProductRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ProductResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/store": {
-            "get": {
-                "description": "Get a list of stores belonging to a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "stores"
-                ],
-                "summary": "Get User Stores",
-                "parameters": [
-                    {
-                        "description": "Stores Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.StoresRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/internal_server_handler.StoreResponse"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new store",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "stores"
-                ],
-                "summary": "Create Store",
-                "parameters": [
-                    {
-                        "description": "Create Store Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.CreateStoreRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.Message"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/store/{id}": {
-            "get": {
-                "description": "Get store by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "stores"
-                ],
-                "summary": "Get Store",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Store ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.StoreResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/stores/{id}": {
-            "put": {
-                "description": "Update store details",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "stores"
-                ],
-                "summary": "Update Store",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Store ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Update Store Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.UpdateStoreRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.StoreResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Remove a store from the system",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "stores"
-                ],
-                "summary": "Delete Store",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Store ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.Message"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     }
                 }
@@ -859,7 +276,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.UsersRequest"
+                            "$ref": "#/definitions/internal_server.UsersRequest"
                         }
                     }
                 ],
@@ -869,20 +286,20 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/internal_server_handler.UserResponse"
+                                "$ref": "#/definitions/internal_server.UserResponse"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     }
                 }
@@ -908,7 +325,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.UserLoginRequest"
+                            "$ref": "#/definitions/internal_server.UserLoginRequest"
                         }
                     }
                 ],
@@ -916,25 +333,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.UserLoginResponse"
+                            "$ref": "#/definitions/internal_server.UserLoginResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     }
                 }
@@ -960,7 +377,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.CreateUserRequest"
+                            "$ref": "#/definitions/internal_server.CreateUserRequest"
                         }
                     }
                 ],
@@ -968,19 +385,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.Message"
+                            "$ref": "#/definitions/internal_server.Message"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     }
                 }
@@ -999,86 +416,29 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Get User",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.UserResponse"
+                            "$ref": "#/definitions/internal_server.UserResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update user by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Update User",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.UserResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server_handler.ErrorResponse"
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
                         }
                     }
                 }
@@ -1086,137 +446,50 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "big.Int": {
-            "type": "object"
-        },
-        "internal_server_handler.CategoryResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string",
-                    "example": "2025-01-01T12:00:00Z"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Electronics"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2025-01-02T12:00:00Z"
-                }
-            }
-        },
-        "internal_server_handler.CreateCategoryRequest": {
+        "internal_server.CreateTaskRequest": {
             "type": "object",
             "required": [
-                "name"
+                "title"
             ],
             "properties": {
-                "name": {
+                "due_date": {
                     "type": "string",
-                    "example": "Electronics"
+                    "example": "2025-03-30T12:00:00Z"
+                },
+                "payload": {
+                    "type": "string",
+                    "example": "Example payload"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Complete project"
                 }
             }
         },
-        "internal_server_handler.CreateProductRequest": {
+        "internal_server.CreateUserRequest": {
             "type": "object",
             "required": [
-                "category_id",
-                "name",
-                "price",
-                "store_id"
-            ],
-            "properties": {
-                "category_id": {
-                    "type": "string",
-                    "example": "223e4567-e89b-12d3-a456-426614174001"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "High-performance gaming laptop"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Laptop"
-                },
-                "price": {
-                    "$ref": "#/definitions/pgtype.Numeric"
-                },
-                "store_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                }
-            }
-        },
-        "internal_server_handler.CreateStoreRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "city",
-                "name"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "123 Market St, Accra"
-                },
-                "city": {
-                    "type": "string",
-                    "example": "Accra"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "BestMart"
-                }
-            }
-        },
-        "internal_server_handler.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "address",
                 "email",
-                "first_name",
-                "last_name",
-                "password",
-                "phone"
+                "name",
+                "password"
             ],
             "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "123 Main St, New York, NY 10001"
-                },
-                "date_of_birth": {
-                    "type": "string",
-                    "example": "2000-01-01"
-                },
                 "email": {
                     "type": "string",
                     "example": "john.doe@example.com"
                 },
-                "first_name": {
+                "name": {
                     "type": "string",
                     "example": "John"
-                },
-                "last_name": {
-                    "type": "string",
-                    "example": "Doe"
                 },
                 "password": {
                     "type": "string",
                     "minLength": 6,
                     "example": "password123"
-                },
-                "phone": {
-                    "type": "string",
-                    "example": "+1 123-456-7890"
                 }
             }
         },
-        "internal_server_handler.ErrorResponse": {
+        "internal_server.ErrorResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1230,7 +503,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_server_handler.Message": {
+        "internal_server.Message": {
             "type": "object",
             "properties": {
                 "message": {
@@ -1238,159 +511,53 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_server_handler.ProductResponse": {
+        "internal_server.TaskResponse": {
             "type": "object",
             "properties": {
-                "category_id": {
-                    "type": "string",
-                    "example": "223e4567-e89b-12d3-a456-426614174001"
-                },
                 "created_at": {
                     "type": "string",
-                    "example": "2025-01-01T12:00:00Z"
+                    "example": "2025-03-25T12:00:00Z"
                 },
                 "description": {
                     "type": "string",
-                    "example": "High-performance gaming laptop"
+                    "example": "Finish the pending project by Friday"
+                },
+                "due_date": {
+                    "type": "string",
+                    "example": "2025-03-30T12:00:00Z"
                 },
                 "id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "image_url": {
+                "status": {
                     "type": "string",
-                    "example": "https://product-image.jpg"
+                    "example": "pending"
                 },
-                "name": {
+                "title": {
                     "type": "string",
-                    "example": "Laptop"
-                },
-                "price": {
-                    "$ref": "#/definitions/pgtype.Numeric"
-                },
-                "stock": {
-                    "type": "integer",
-                    "example": 20
-                },
-                "store_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                    "example": "Complete project"
                 },
                 "updated_at": {
                     "type": "string",
-                    "example": "2025-01-02T12:00:00Z"
+                    "example": "2025-03-26T12:00:00Z"
                 }
             }
         },
-        "internal_server_handler.ProductsRequest": {
-            "type": "object",
-            "required": [
-                "page_id",
-                "page_size"
-            ],
-            "properties": {
-                "page_id": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "example": 1
-                },
-                "page_size": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "example": 10
-                }
-            }
-        },
-        "internal_server_handler.StoreResponse": {
+        "internal_server.UpdateTaskRequest": {
             "type": "object",
             "properties": {
-                "address": {
+                "result": {
                     "type": "string",
-                    "example": "123 Market St, Accra"
+                    "example": "2025-04-01T12:00:00Z"
                 },
-                "city": {
+                "status": {
                     "type": "string",
-                    "example": "Accra"
-                },
-                "created_at": {
-                    "type": "string",
-                    "example": "2025-01-01T12:00:00Z"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "BestMart"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2025-01-02T12:00:00Z"
+                    "example": "completed"
                 }
             }
         },
-        "internal_server_handler.StoresRequest": {
-            "type": "object",
-            "required": [
-                "page_id",
-                "page_size"
-            ],
-            "properties": {
-                "page_id": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "example": 1
-                },
-                "page_size": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "example": 10
-                }
-            }
-        },
-        "internal_server_handler.UpdateCategoryRequest": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "example": "Updated Electronics"
-                }
-            }
-        },
-        "internal_server_handler.UpdateProductRequest": {
-            "type": "object"
-        },
-        "internal_server_handler.UpdateStoreRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "city",
-                "name"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "123 Market St, Accra"
-                },
-                "city": {
-                    "type": "string",
-                    "example": "Accra"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "BestMart is a leading store in Accra"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "BestMart"
-                }
-            }
-        },
-        "internal_server_handler.UserLoginRequest": {
+        "internal_server.UserLoginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -1407,7 +574,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_server_handler.UserLoginResponse": {
+        "internal_server.UserLoginResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -1431,17 +598,16 @@ const docTemplate = `{
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "user": {
-                    "$ref": "#/definitions/internal_server_handler.UserResponse"
+                    "$ref": "#/definitions/internal_server.UserResponse"
                 }
             }
         },
-        "internal_server_handler.UserResponse": {
+        "internal_server.UserResponse": {
             "type": "object",
+            "required": [
+                "name"
+            ],
             "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "123 Main St, New York, NY 10001"
-                },
                 "created_at": {
                     "type": "string",
                     "example": "2025-01-01T12:00:00Z"
@@ -1450,21 +616,13 @@ const docTemplate = `{
                     "type": "string",
                     "example": "john.doe@example.com"
                 },
-                "first_name": {
-                    "type": "string",
-                    "example": "John"
-                },
                 "id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
-                "last_name": {
+                "name": {
                     "type": "string",
-                    "example": "Doe"
-                },
-                "phone": {
-                    "type": "string",
-                    "example": "+1 123-456-7890"
+                    "example": "John"
                 },
                 "updated_at": {
                     "type": "string",
@@ -1472,26 +630,26 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_server_handler.UsersRequest": {
+        "internal_server.UsersRequest": {
             "type": "object",
             "required": [
-                "page_id",
-                "page_size"
+                "pageID",
+                "pageSize"
             ],
             "properties": {
-                "page_id": {
+                "pageID": {
                     "type": "integer",
                     "minimum": 1,
                     "example": 1
                 },
-                "page_size": {
+                "pageSize": {
                     "type": "integer",
                     "minimum": 1,
                     "example": 10
                 }
             }
         },
-        "internal_server_handler.renewAccessTokenRequest": {
+        "internal_server.renewAccessTokenRequest": {
             "type": "object",
             "required": [
                 "refresh_token"
@@ -1502,7 +660,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_server_handler.renewAccessTokenResponse": {
+        "internal_server.renewAccessTokenResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -1510,39 +668,6 @@ const docTemplate = `{
                 },
                 "access_token_expires_at": {
                     "type": "string"
-                }
-            }
-        },
-        "pgtype.InfinityModifier": {
-            "type": "integer",
-            "enum": [
-                1,
-                0,
-                -1
-            ],
-            "x-enum-varnames": [
-                "Infinity",
-                "Finite",
-                "NegativeInfinity"
-            ]
-        },
-        "pgtype.Numeric": {
-            "type": "object",
-            "properties": {
-                "exp": {
-                    "type": "integer"
-                },
-                "infinityModifier": {
-                    "$ref": "#/definitions/pgtype.InfinityModifier"
-                },
-                "int": {
-                    "$ref": "#/definitions/big.Int"
-                },
-                "naN": {
-                    "type": "boolean"
-                },
-                "valid": {
-                    "type": "boolean"
                 }
             }
         }
@@ -1555,7 +680,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "cheapstores-service API",
+	Title:            "task-manager API",
 	Description:      "API documentation for CheapStores Service",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

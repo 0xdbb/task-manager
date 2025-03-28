@@ -12,12 +12,12 @@ import (
 )
 
 type Notification struct {
-	ID        uuid.UUID        `json:"id"`
-	UserID    pgtype.UUID      `json:"user_id"`
-	TaskID    pgtype.UUID      `json:"task_id"`
-	Message   pgtype.Text      `json:"message"`
-	Read      pgtype.Bool      `json:"read"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	ID        uuid.UUID   `json:"id"`
+	UserID    pgtype.UUID `json:"user_id"`
+	TaskID    pgtype.UUID `json:"task_id"`
+	Message   pgtype.Text `json:"message"`
+	Read      pgtype.Bool `json:"read"`
+	CreatedAt time.Time   `json:"created_at"`
 }
 
 type Session struct {
@@ -32,23 +32,24 @@ type Session struct {
 }
 
 type Task struct {
-	ID        uuid.UUID        `json:"id"`
-	UserID    uuid.UUID        `json:"user_id"`
-	Type      string           `json:"type"`
-	Payload   string           `json:"payload"`
-	Status    pgtype.Text      `json:"status"`
-	Result    pgtype.Text      `json:"result"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	ID        uuid.UUID   `json:"id"`
+	UserID    uuid.UUID   `json:"user_id"`
+	Type      string      `json:"type"`
+	Payload   string      `json:"payload"`
+	Status    pgtype.Text `json:"status"`
+	Result    pgtype.Text `json:"result"`
+	DueTime   time.Time   `json:"due_time"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
 }
 
 type TaskLog struct {
-	ID        uuid.UUID        `json:"id"`
-	TaskID    uuid.UUID        `json:"task_id"`
-	WorkerID  pgtype.Text      `json:"worker_id"`
-	Status    string           `json:"status"`
-	Message   pgtype.Text      `json:"message"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	ID        uuid.UUID   `json:"id"`
+	TaskID    uuid.UUID   `json:"task_id"`
+	WorkerID  pgtype.Text `json:"worker_id"`
+	Status    string      `json:"status"`
+	Message   pgtype.Text `json:"message"`
+	CreatedAt time.Time   `json:"created_at"`
 }
 
 type User struct {

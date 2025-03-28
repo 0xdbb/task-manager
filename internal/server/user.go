@@ -24,8 +24,8 @@ type UserRequest struct {
 }
 
 type UsersRequest struct {
-	PageSize int32 `json:"page_size" binding:"required,min=1" example:"10"`
-	PageID   int32 `json:"page_id" binding:"required,min=1" example:"1"`
+	PageSize int32 `query:"page_size" binding:"required,min=1" example:"10"`
+	PageID   int32 `query:"page_id" binding:"required,min=1" example:"1"`
 }
 
 type UserLoginRequest struct {
@@ -75,7 +75,7 @@ func newUserResponse(user db.User) UserResponse {
 func (h *Server) GetUsers(ctx *gin.Context) {
 	var req UsersRequest
 
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request - perhaps page_id and page_size are missing in body"))
 		return
 	}
@@ -99,7 +99,7 @@ func (h *Server) GetUsers(ctx *gin.Context) {
 // @Tags			users
 // @Accept			json
 // @Produce		json
-// @Param			id	path		int	true	"User ID"
+// @Param			id	path		uuid.UUID	true	"User ID"
 // @Success		200	{object}	UserResponse
 // @Failure		400	{object}	ErrorResponse
 // @Failure		404	{object}	ErrorResponse
@@ -200,7 +200,7 @@ func (h *Server) Login(ctx *gin.Context) {
 
 	err = util.VerifyPassword(user.Password, userLoginReq.Password)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, HandleError(err, http.StatusNotFound, "Invalid email or password"))
+		ctx.JSON(http.StatusUnauthorized, HandleError(err, http.StatusNotFound, "Invalid email or password"))
 		return
 	}
 

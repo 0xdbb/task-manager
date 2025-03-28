@@ -10,9 +10,9 @@ LIMIT $2 OFFSET $3;
 
 -- name: CreateTask :one
 INSERT INTO "task" (
-  user_id, type, payload, status
+  user_id, type, payload, status, due_time
 ) VALUES (
-  $1, $2, $3, 'pending'
+  $1, $2, $3, 'pending', $4
 )
 RETURNING *;
 

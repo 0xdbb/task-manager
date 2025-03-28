@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -14,21 +15,27 @@ import (
 
 const createTask = `-- name: CreateTask :one
 INSERT INTO "task" (
-  user_id, type, payload, status
+  user_id, type, payload, status, due_time
 ) VALUES (
-  $1, $2, $3, 'pending'
+  $1, $2, $3, 'pending', $4
 )
-RETURNING id, user_id, type, payload, status, result, created_at, updated_at
+RETURNING id, user_id, type, payload, status, result, due_time, created_at, updated_at
 `
 
 type CreateTaskParams struct {
 	UserID  uuid.UUID `json:"user_id"`
 	Type    string    `json:"type"`
 	Payload string    `json:"payload"`
+	DueTime time.Time `json:"due_time"`
 }
 
 func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, error) {
-	row := q.db.QueryRow(ctx, createTask, arg.UserID, arg.Type, arg.Payload)
+	row := q.db.QueryRow(ctx, createTask,
+		arg.UserID,
+		arg.Type,
+		arg.Payload,
+		arg.DueTime,
+	)
 	var i Task
 	err := row.Scan(
 		&i.ID,
@@ -37,6 +44,7 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 		&i.Payload,
 		&i.Status,
 		&i.Result,
+		&i.DueTime,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -79,7 +87,7 @@ func (q *Queries) DeleteTask(ctx context.Context, id uuid.UUID) error {
 }
 
 const getTask = `-- name: GetTask :one
-SELECT id, user_id, type, payload, status, result, created_at, updated_at FROM "task"
+SELECT id, user_id, type, payload, status, result, due_time, created_at, updated_at FROM "task"
 WHERE id = $1
 `
 
@@ -93,6 +101,7 @@ func (q *Queries) GetTask(ctx context.Context, id uuid.UUID) (Task, error) {
 		&i.Payload,
 		&i.Status,
 		&i.Result,
+		&i.DueTime,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -135,7 +144,7 @@ func (q *Queries) GetTaskLog(ctx context.Context, taskID uuid.UUID) ([]TaskLog, 
 }
 
 const listTasksByUser = `-- name: ListTasksByUser :many
-SELECT id, user_id, type, payload, status, result, created_at, updated_at FROM "task"
+SELECT id, user_id, type, payload, status, result, due_time, created_at, updated_at FROM "task"
 WHERE user_id = $1
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -163,6 +172,7 @@ func (q *Queries) ListTasksByUser(ctx context.Context, arg ListTasksByUserParams
 			&i.Payload,
 			&i.Status,
 			&i.Result,
+			&i.DueTime,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -182,7 +192,7 @@ SET status = $2,
     result = $3,
     updated_at = now()
 WHERE id = $1
-RETURNING id, user_id, type, payload, status, result, created_at, updated_at
+RETURNING id, user_id, type, payload, status, result, due_time, created_at, updated_at
 `
 
 type UpdateTaskStatusParams struct {
@@ -201,6 +211,7 @@ func (q *Queries) UpdateTaskStatus(ctx context.Context, arg UpdateTaskStatusPara
 		&i.Payload,
 		&i.Status,
 		&i.Result,
+		&i.DueTime,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
