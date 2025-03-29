@@ -20,7 +20,7 @@ type Payload struct {
 	UserID    uuid.UUID `json:"user_id"`
 	Role      string    `json:"role"`
 	IssuedAt  time.Time `json:"issued_at"`
-	ExpiredAt time.Time `json:"expired_at"`
+	ExpireAt time.Time `json:"expired_at"`
 	jwt.RegisteredClaims
 }
 
@@ -36,14 +36,14 @@ func NewPayload(userID uuid.UUID, role string, duration time.Duration) (*Payload
 		UserID:    userID,
 		Role:      role,
 		IssuedAt:  time.Now(),
-		ExpiredAt: time.Now().Add(duration),
+		ExpireAt: time.Now().Add(duration),
 	}
 	return payload, nil
 }
 
 // Valid checks if the token payload is valid or not
 func (payload *Payload) Valid() error {
-	if time.Now().After(payload.ExpiredAt) {
+	if time.Now().After(payload.ExpireAt) {
 		return ErrExpiredToken
 	}
 	return nil

@@ -15,6 +15,116 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Login user with email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login User",
+                "parameters": [
+                    {
+                        "description": "User Login Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.UserLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.UserLoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Register a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register User",
+                "parameters": [
+                    {
+                        "description": "Create User Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request due to invalid query params",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: Admins only",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/renew": {
             "post": {
                 "description": "Generates a new access token using a valid refresh token",
@@ -75,6 +185,11 @@ const docTemplate = `{
         },
         "/task": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get a list of all tasks with pagination. Supports filtering by passing ` + "`" + `user_id` + "`" + ` as a query parameter.",
                 "consumes": [
                     "application/json"
@@ -127,6 +242,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new task",
                 "consumes": [
                     "application/json"
@@ -173,6 +293,11 @@ const docTemplate = `{
         },
         "/task/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get task by ID",
                 "consumes": [
                     "application/json"
@@ -184,6 +309,15 @@ const docTemplate = `{
                     "tasks"
                 ],
                 "summary": "Get Task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (UUID format)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -210,8 +344,15 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/task/{id}/status": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the status of an existing task",
                 "consumes": [
                     "application/json"
@@ -224,6 +365,13 @@ const docTemplate = `{
                 ],
                 "summary": "Update Task Status",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (UUID format)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Update Task Request",
                         "name": "request",
@@ -258,6 +406,11 @@ const docTemplate = `{
         },
         "/user": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get a list of users",
                 "consumes": [
                     "application/json"
@@ -271,13 +424,16 @@ const docTemplate = `{
                 "summary": "Get Users",
                 "parameters": [
                     {
-                        "description": "User Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_server.UsersRequest"
-                        }
+                        "type": "integer",
+                        "description": "Number of users per page",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -305,106 +461,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/login": {
-            "post": {
-                "description": "Login user with email and password",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Login User",
-                "parameters": [
-                    {
-                        "description": "User Login Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_server.UserLoginRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server.UserLoginResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/user/register": {
-            "post": {
-                "description": "Register a new user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Register User",
-                "parameters": [
-                    {
-                        "description": "Create User Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_server.CreateUserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server.Message"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/internal_server.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/user/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get user by ID",
                 "consumes": [
                     "application/json"
@@ -416,6 +479,15 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Get User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (UUID format)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -444,6 +516,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -454,6 +531,15 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Delete User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (UUID format)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -484,6 +570,11 @@ const docTemplate = `{
         },
         "/user/{id}/role": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -495,6 +586,13 @@ const docTemplate = `{
                 ],
                 "summary": "Update User Role",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID (UUID format)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "New Role",
                         "name": "role",
@@ -538,9 +636,19 @@ const docTemplate = `{
         "internal_server.CreateTaskRequest": {
             "type": "object",
             "required": [
-                "title"
+                "description",
+                "due_date",
+                "payload",
+                "priority",
+                "title",
+                "type",
+                "user_id"
             ],
             "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Image Processing"
+                },
                 "due_date": {
                     "type": "string",
                     "example": "2025-03-30T12:00:00Z"
@@ -549,9 +657,21 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Example payload"
                 },
+                "priority": {
+                    "type": "string",
+                    "example": "high"
+                },
                 "title": {
                     "type": "string",
-                    "example": "Complete project"
+                    "example": "Image Processing"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "Image Processing"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 }
             }
         },
@@ -560,7 +680,8 @@ const docTemplate = `{
             "required": [
                 "email",
                 "name",
-                "password"
+                "password",
+                "role"
             ],
             "properties": {
                 "email": {
@@ -574,7 +695,16 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 6,
-                    "example": "password123"
+                    "example": "password123{#Pbb"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "ADMIN",
+                        "STANDARD",
+                        "WORKER"
+                    ],
+                    "example": "ADMIN"
                 }
             }
         },
@@ -596,7 +726,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "success"
                 }
             }
         },
@@ -637,7 +768,8 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string",
-                    "example": "password123"
+                    "minLength": 6,
+                    "example": "password123{#Pbb"
                 }
             }
         },
@@ -698,25 +830,6 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string",
                     "example": "2025-01-02T12:00:00Z"
-                }
-            }
-        },
-        "internal_server.UsersRequest": {
-            "type": "object",
-            "required": [
-                "pageID",
-                "pageSize"
-            ],
-            "properties": {
-                "pageID": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "example": 1
-                },
-                "pageSize": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "example": 10
                 }
             }
         },
@@ -832,6 +945,13 @@ const docTemplate = `{
                 "TaskStatusFAILED"
             ]
         }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
@@ -839,7 +959,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "",
+	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "task-manager API",
 	Description:      "API documentation for CheapStores Service",

@@ -6,20 +6,20 @@ import (
 	"github.com/google/uuid"
 )
 
-// Users types
 type CreateUserRequest struct {
 	Name     string `json:"name" binding:"required" example:"John"`
-	Password string `json:"password" binding:"required,min=6,StrongPassword" example:"password123"`
-	Email    string `json:"email" binding:"required" example:"john.doe@example.com"`
+	Password string `json:"password" binding:"required,min=6,StrongPassword" example:"password123{#Pbb"`
+	Email    string `json:"email" binding:"required,email" example:"john.doe@example.com"`
+	Role     string `json:"role" binding:"required,oneof=ADMIN STANDARD WORKER" example:"ADMIN"`
 }
 
 type UserRequest struct {
-	ID uuid.UUID `uri:"id" binding:"min=0" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ID string `uri:"id" binding:"min=0" example:"123e4567-e89b-12d3-a456-426614174000"`
 }
 
 type UsersRequest struct {
-	PageSize int32 `query:"page_size" binding:"required,min=1" example:"10"`
-	PageID   int32 `query:"page_id" binding:"required,min=1" example:"1"`
+	PageSize int32 `form:"page_size" binding:"required,min=1" example:"10"`
+	PageID   int32 `form:"page_id" binding:"required,min=1" example:"1"`
 }
 
 type UpdateUserRoleRequest struct {
@@ -28,7 +28,7 @@ type UpdateUserRoleRequest struct {
 
 type UserLoginRequest struct {
 	Email    string `json:"email" binding:"required" example:"john.doe@example.com"`
-	Password string `json:"password" binding:"required" example:"password123"`
+	Password string `json:"password" binding:"required,min=6,StrongPassword" example:"password123{#Pbb"`
 }
 
 type UserLoginResponse struct {

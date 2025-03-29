@@ -18,8 +18,8 @@ type CreateTaskRequest struct {
 	Type        string    `json:"type" binding:"required" example:"Image Processing"`
 	Description string    `json:"description" binding:"required" example:"Image Processing"`
 	UserID      uuid.UUID `json:"user_id" binding:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Priority    string    `json:"priority" binding:"required" example:"high"`
-	Payload     string    `json:"payload" binding:"required" example:"Example payload"`
+	Priority    string    `json:"priority" binding:"required" example:"HIGH"`
+	Payload     string    `json:"payload" binding:"required" example:"{\"recipient\":\"user@example.com\",\"subject\":\"Welcome\",\"body\":\"Thanks for signing up!\"}"`
 	DueTime     time.Time `json:"due_date" binding:"required" example:"2025-03-30T12:00:00Z"`
 }
 
@@ -33,9 +33,9 @@ type TaskRequest struct {
 }
 
 type TasksRequest struct {
-	PageSize int32     `query:"page_size" binding:"required,min=1" example:"10"`
-	PageID   int32     `query:"page_id" binding:"required,min=1" example:"1"`
-	UserID   uuid.UUID `query:"user_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	PageSize int32     `form:"page_size" binding:"required,min=1" example:"10"`
+	PageID   int32     `form:"page_id" binding:"required,min=1" example:"1"`
+	UserID   uuid.UUID `form:"user_id" example:"123e4567-e89b-12d3-a456-426614174000"`
 }
 
 // @Summary		Get all created Tasks
@@ -43,6 +43,7 @@ type TasksRequest struct {
 // @Tags			tasks
 // @Accept			json
 // @Produce		json
+// @Security BearerAuth
 // @Param			page_size	query	int	true	"Page Size"
 // @Param			page_id		query	int	true	"Page Number"
 // @Success		200			{array}		db.Task
@@ -79,7 +80,8 @@ func (h *Server) GetTasks(ctx *gin.Context) {
 // @Tags			tasks
 // @Accept			json
 // @Produce		json
-// @Param			id	path		uuid.UUID	true	"Task ID"
+// @Security BearerAuth
+// @Param id path string true "User ID (UUID format)"
 // @Success		200	{object}	db.Task
 // @Failure		400	{object}	ErrorResponse
 // @Failure		404	{object}	ErrorResponse
@@ -114,6 +116,7 @@ func (h *Server) GetTask(ctx *gin.Context) {
 // @Tags			tasks
 // @Accept			json
 // @Produce		json
+// @Security BearerAuth
 // @Param			request	body		CreateTaskRequest	true	"Create Task Request"
 // @Success		201		{object}	db.Task
 // @Failure		400		{object}	ErrorResponse
@@ -133,7 +136,13 @@ func (h *Server) CreateTask(ctx *gin.Context) {
 	// TODO: Publish to queue
 
 	taskArg := db.CreateTaskParams{
-		DueTime: task.DueTime,
+		UserID:      task.UserID,
+		Title:       task.Title,
+		Description: task.Description,
+		Type:        "DATA_PROCESSING", // or REPORT_GENERATION or DATA_LABELING or RESULT_REVIEW
+		Payload:     task.Payload,
+		DueTime:     task.DueTime,
+		Priority:    "High",
 	}
 
 	createdTask, err := h.db.CreateTask(ctx, taskArg)
@@ -150,12 +159,13 @@ func (h *Server) CreateTask(ctx *gin.Context) {
 // @Tags			tasks
 // @Accept			json
 // @Produce		json
-// @Param			id		path		uuid.UUID			true	"Task ID"
+// @Security BearerAuth
+// @Param id path string true "User ID (UUID format)"
 // @Param			request	body		UpdateTaskRequest	true	"Update Task Request"
 // @Success		200		{object}	db.Task
 // @Failure		400		{object}	ErrorResponse
 // @Failure		500		{object}	ErrorResponse
-// @Router			/task/{id} [patch]
+// @Router			/task/{id}/status [patch]
 func (h *Server) UpdateTaskStatus(ctx *gin.Context) {
 	if !isAdmin(ctx) {
 		return

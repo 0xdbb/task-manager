@@ -1,7 +1,4 @@
-package main
-
-func main() {
+package worker
 
 	// TODO: Listen to queue
 
-}

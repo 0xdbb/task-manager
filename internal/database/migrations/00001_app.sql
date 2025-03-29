@@ -25,7 +25,7 @@ CREATE TABLE "task" (
   "user_id" UUID NOT NULL,
   "priority" task_priority NOT NULL,
   "payload" TEXT NOT NULL,
-  "status" task_status DEFAULT 'pending',
+  "status" task_status DEFAULT 'PENDING',
   "result" TEXT,
   "due_time" TIMESTAMPTZ NOT NULL, 
   "created_at" TIMESTAMPTZ DEFAULT now(),

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	db "task-manager/internal/database/sqlc"
 )
@@ -16,7 +17,9 @@ import (
 // @Tags			users
 // @Accept			json
 // @Produce		json
-// @Param			request	body		UsersRequest	true	"User Request"
+// @Security BearerAuth
+// @Param			page_size	query		int	false	"Number of users per page"
+// @Param			page_id		query		int	false	"Page number"
 // @Success		200		{array}		UserResponse
 // @Failure		400		{object}	ErrorResponse
 // @Failure		500		{object}	ErrorResponse
@@ -51,7 +54,8 @@ func (h *Server) GetUsers(ctx *gin.Context) {
 // @Tags			users
 // @Accept			json
 // @Produce		json
-// @Param			id	path		uuid.UUID	true	"User ID"
+// @Security BearerAuth
+// @Param id path string true "User ID (UUID format)"
 // @Success		200	{object}	UserResponse
 // @Failure		400	{object}	ErrorResponse
 // @Failure		404	{object}	ErrorResponse
@@ -62,14 +66,15 @@ func (h *Server) GetUser(ctx *gin.Context) {
 		return
 	}
 
-	var userReq UserRequest
+	id := ctx.Param("id")
 
-	if err := ctx.ShouldBindUri(&userReq); err != nil {
-		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request"))
+	userID, err := uuid.Parse(id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid ID"))
 		return
 	}
 
-	user, err := h.db.GetUser(ctx, userReq.ID)
+	user, err := h.db.GetUser(ctx, userID)
 	if err != nil {
 		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, HandleError(err, http.StatusNotFound, "User does not exist"))
@@ -86,7 +91,8 @@ func (h *Server) GetUser(ctx *gin.Context) {
 // @Tags     users
 // @Accept   json
 // @Produce  json
-// @Param    id   path   uuid.UUID  true  "User ID"
+// @Security BearerAuth
+// @Param id path string true "User ID (UUID format)"
 // @Param    role body     UpdateUserRoleRequest true  "New Role"
 // @Success  200  {object}  Message
 // @Failure  400  {object}  ErrorResponse
@@ -99,10 +105,11 @@ func (h *Server) UpdateUserRole(ctx *gin.Context) {
 	}
 	var req UpdateUserRoleRequest
 
-	var userReq UserRequest
+	id := ctx.Param("id")
 
-	if err := ctx.ShouldBindUri(&userReq); err != nil {
-		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid user ID"))
+	userID, err := uuid.Parse(id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid ID"))
 		return
 	}
 
@@ -112,8 +119,8 @@ func (h *Server) UpdateUserRole(ctx *gin.Context) {
 	}
 
 	// Update User Role
-	_, err := h.db.UpdateUserRole(ctx, db.UpdateUserRoleParams{
-		ID:   userReq.ID,
+	_, err = h.db.UpdateUserRole(ctx, db.UpdateUserRoleParams{
+		ID:   userID,
 		Role: db.UserRole(req.Role),
 	})
 
@@ -133,7 +140,8 @@ func (h *Server) UpdateUserRole(ctx *gin.Context) {
 // @Tags     users
 // @Accept   json
 // @Produce  json
-// @Param    id path uuid.UUID true "User ID"
+// @Security BearerAuth
+// @Param id path string true "User ID (UUID format)"
 // @Success  200  {object}  Message
 // @Failure  400  {object}  ErrorResponse
 // @Failure  404  {object}  ErrorResponse
@@ -143,14 +151,15 @@ func (h *Server) DeleteUser(ctx *gin.Context) {
 	if !isAdmin(ctx) {
 		return
 	}
-	var userReq UserRequest
+	id := ctx.Param("id")
 
-	if err := ctx.ShouldBindUri(&userReq); err != nil {
-		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid user ID"))
+	userID, err := uuid.Parse(id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid ID"))
 		return
 	}
 
-	err := h.db.DeleteUser(ctx, userReq.ID)
+	err = h.db.DeleteUser(ctx, userID)
 	if err != nil {
 		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, HandleError(err, http.StatusNotFound, "User not found"))

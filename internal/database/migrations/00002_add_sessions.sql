@@ -11,8 +11,7 @@ CREATE TABLE "session" (
   "created_at" timestamptz DEFAULT (now())
 );
 
-ALTER TABLE "session" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
--- +goose StatementEnd
+ALTER TABLE "session" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE-- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin

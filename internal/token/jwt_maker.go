@@ -16,6 +16,8 @@ type JWTMaker struct {
 	secretKey string
 }
 
+// FIX: Token doesn't expire after expiry time
+
 // NewJWTMaker creates a new JWTMaker
 func NewJWTMaker(secretKey string) (Maker, error) {
 	if len(secretKey) < minSecretKeySize {
@@ -57,6 +59,11 @@ func (maker *JWTMaker) VerifyToken(token string) (*Payload, error) {
 	payload, ok := jwtToken.Claims.(*Payload)
 	if !ok {
 		return nil, ErrInvalidToken
+	}
+
+	if err := payload.Valid(); err != nil {
+		return nil, ErrExpiredToken
+
 	}
 
 	return payload, nil

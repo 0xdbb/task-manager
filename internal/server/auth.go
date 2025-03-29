@@ -23,9 +23,11 @@ var ADMIN = "ADMIN"
 // @Produce		json
 // @Param			request	body		CreateUserRequest	true	"Create User Request"
 // @Success		200		{object}	Message
-// @Failure		400		{object}	ErrorResponse
-// @Failure		500		{object}	ErrorResponse
-// @Router			/user/register [post]
+// @Failure 400 {object} ErrorResponse "Bad request due to invalid query params"
+// @Failure 401 {object} ErrorResponse "Unauthorized access"
+// @Failure 403 {object} ErrorResponse "Forbidden: Admins only"
+// @Failure 500 {object} ErrorResponse "Internal server error"
+// @Router			/auth/register [post]
 func (h *Server) Register(ctx *gin.Context) {
 	var user CreateUserRequest
 
@@ -44,6 +46,7 @@ func (h *Server) Register(ctx *gin.Context) {
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: passwordHash,
+		Role: db.UserRole(user.Role),
 	}
 
 	_, err = h.db.CreateUser(ctx, userArg)
@@ -68,7 +71,7 @@ func (h *Server) Register(ctx *gin.Context) {
 // @Failure		400		{object}	ErrorResponse
 // @Failure		404		{object}	ErrorResponse
 // @Failure		500		{object}	ErrorResponse
-// @Router			/user/login [post]
+// @Router			/auth/login [post]
 func (h *Server) Login(ctx *gin.Context) {
 	var userLoginReq UserLoginRequest
 
@@ -116,7 +119,7 @@ func (h *Server) Login(ctx *gin.Context) {
 		UserAgent:    ctx.Request.UserAgent(),
 		ClientIp:     ctx.ClientIP(),
 		IsBlocked:    false,
-		ExpiresAt:    refreshPayload.ExpiredAt,
+		ExpiresAt:    refreshPayload.ExpireAt,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error creating session"))
@@ -126,9 +129,9 @@ func (h *Server) Login(ctx *gin.Context) {
 	rsp := UserLoginResponse{
 		SessionID:             session.ID,
 		AccessToken:           accessToken,
-		AccessTokenExpiresAt:  accessPayload.ExpiredAt,
+		AccessTokenExpiresAt:  accessPayload.ExpireAt,
 		RefreshToken:          refreshToken,
-		RefreshTokenExpiresAt: refreshPayload.ExpiredAt,
+		RefreshTokenExpiresAt: refreshPayload.ExpireAt,
 		User:                  newUserResponse(user),
 	}
 

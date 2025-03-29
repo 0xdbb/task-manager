@@ -8,7 +8,7 @@ type ErrorResponse struct {
 }
 
 type Message struct {
-	Message string `json:"message"`
+	Message string `json:"message" example:"success"`
 }
 
 func HandleError(err error, code int, message ...string) ErrorResponse {
