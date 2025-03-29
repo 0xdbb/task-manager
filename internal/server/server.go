@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"task-manager/config"
 	db "task-manager/internal/database/sqlc"
+	"task-manager/internal/queue"
 	"task-manager/internal/token"
 	"time"
 
@@ -19,12 +20,14 @@ type Server struct {
 
 	tokenMaker token.Maker
 
+	queueManager *queue.QueueManager
+
 	db *db.Service
 
 	config *config.Config
 }
 
-func NewServer(config *config.Config) (*http.Server, error) {
+func NewServer(config *config.Config, queueManager *queue.QueueManager) (*http.Server, error) {
 
 	mode := gin.DebugMode
 
@@ -56,6 +59,8 @@ func NewServer(config *config.Config) (*http.Server, error) {
 		config: config,
 
 		tokenMaker: tokenMaker,
+
+		queueManager: queueManager,
 
 		db: newService,
 	}

@@ -13,6 +13,7 @@ import (
 type Config struct {
 	DB_URL                 string
 	DB_URL_DEV             string
+	RMQ_ADDRESS            string
 	PRODUCTION             string
 	PORT                   string
 	TOKEN_SECRET           string
@@ -58,6 +59,7 @@ func LoadConfig(paths ...string) (*Config, error) {
 		TOKEN_SECRET:           os.Getenv("TOKEN_SECRET"),
 		ACCESS_TOKEN_DURATION:  accessTokenDuration,
 		REFRESH_TOKEN_DURATION: refreshTokenDuration,
+		RMQ_ADDRESS:            os.Getenv("RMQ_ADDRESS"),
 		ALLOWED_ORIGINS:        os.Getenv("ALLOWED_ORIGINS"),
 	}
 
@@ -81,6 +83,10 @@ func validateConfig(config *Config) error {
 
 	if config.REFRESH_TOKEN_DURATION == 0 {
 		return errors.New("missing or invalid required environment variable: REFRESH_TOKEN_DURATION")
+	}
+
+	if config.RMQ_ADDRESS == "" {
+		return errors.New("missing or invalid required environment variable: RMQ_ADDRESS")
 	}
 
 	if config.PORT == "" {

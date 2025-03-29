@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"fmt"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -33,23 +34,42 @@ type QueueManager struct {
 	channel *amqp.Channel
 }
 
-// NewQueueManager initializes a new QueueManager.
-func NewQueueManager(amqpURL string) (*QueueManager, error) {
-	conn, err := amqp.Dial(amqpURL)
-	if err != nil {
-		return nil, err
+// NewQueueManager initializes a new QueueManager with exponential backoff
+func NewQueueManager(amqpURL string, prefetchCount int) (*QueueManager, error) {
+	var (
+		conn       *amqp.Connection
+		err        error
+		maxRetries = 5
+	)
+
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		conn, err = amqp.Dial(amqpURL)
+		if err == nil {
+			ch, err := conn.Channel()
+			if err != nil {
+				conn.Close()
+				return nil, fmt.Errorf("failed to open channel: %w", err)
+			}
+
+			// Apply QoS (Prefetch Count)
+			err = ch.Qos(prefetchCount, 0, false)
+			if err != nil {
+				conn.Close()
+				return nil, fmt.Errorf("failed to set QoS: %w", err)
+			}
+
+			return &QueueManager{
+				conn:    conn,
+				channel: ch,
+			}, nil
+		}
+
+		backoffDuration := time.Duration(1<<attempt) * time.Second
+		fmt.Printf("Connection attempt %d failed; retrying in %v\n", attempt+1, backoffDuration)
+		time.Sleep(backoffDuration)
 	}
 
-	ch, err := conn.Channel()
-	if err != nil {
-		conn.Close()
-		return nil, err
-	}
-
-	return &QueueManager{
-		conn:    conn,
-		channel: ch,
-	}, nil
+	return nil, fmt.Errorf("failed to connect to RabbitMQ after %d attempts: %w", maxRetries, err)
 }
 
 // DeclareQueue declares a queue with the provided options.

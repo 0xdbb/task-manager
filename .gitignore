@@ -1,4 +1,7 @@
 .env
 build/
 dist/
-/
+bin/
+tmp/
+main
+

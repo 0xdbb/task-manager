@@ -16,6 +16,7 @@ import (
 	"syscall"
 	"task-manager/config"
 	_ "task-manager/docs/swagger" // Import generated Swagger docs
+	"task-manager/internal/queue"
 	"task-manager/internal/server"
 	"time"
 )
@@ -38,7 +39,7 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 		log.Printf("Server forced to shutdown with error: %v", err)
 	}
 
-	log.Println("Server exiting")
+	log.Println("-----Server exiting-----")
 
 	// Notify the main goroutine that the shutdown is complete
 	done <- true
@@ -50,7 +51,12 @@ func main() {
 		panic(fmt.Sprintf("config error: %s", err))
 	}
 
-	server, err := server.NewServer(config)
+	newQueue, err := queue.NewQueueManager(config.RMQ_ADDRESS)
+	if err != nil {
+		log.Fatal(fmt.Sprintf("config error: %s", err))
+	}
+
+	server, err := server.NewServer(config, newQueue)
 	if err != nil {
 		panic(fmt.Sprintf("config error: %s", err))
 	}
