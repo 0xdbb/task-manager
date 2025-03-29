@@ -91,7 +91,7 @@ func (h *Server) RenewAccessToken(ctx *gin.Context) {
 
 	rsp := renewAccessTokenResponse{
 		AccessToken:          accessToken,
-		AccessTokenExpiresAt: accessPayload.ExpiredAt,
+		AccessTokenExpiresAt: accessPayload.ExpireAt,
 	}
 	ctx.JSON(http.StatusOK, rsp)
 }
