@@ -49,3 +49,29 @@ type UserResponse struct {
 	CreatedAt time.Time `json:"created_at" example:"2025-01-01T12:00:00Z"`
 	UpdatedAt time.Time `json:"updated_at" example:"2025-01-02T12:00:00Z"`
 }
+
+// Task Types
+type CreateTaskRequest struct {
+	Title       string    `json:"title" binding:"required" example:"Image Processing"`
+	Type        string    `json:"type" binding:"required" example:"Image Processing"`
+	Description string    `json:"description" binding:"required" example:"Image Processing"`
+	UserID      uuid.UUID `json:"user_id" binding:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Priority    string    `json:"priority" binding:"required" example:"HIGH"`
+	Payload     string    `json:"payload" binding:"required" example:"{\"recipient\":\"user@example.com\",\"subject\":\"Welcome\",\"body\":\"Thanks for signing up!\"}"`
+	DueTime     time.Time `json:"due_date" binding:"required" example:"2025-03-30T12:00:00Z"`
+}
+
+type UpdateTaskRequest struct {
+	Status string `json:"status" example:"completed"`
+	Result string `json:"result" example:"2025-04-01T12:00:00Z"`
+}
+
+type TaskRequest struct {
+	ID uuid.UUID `uri:"id" binding:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
+}
+
+type TasksRequest struct {
+	PageSize int32     `form:"page_size" binding:"required,min=1" example:"10"`
+	PageID   int32     `form:"page_id" binding:"required,min=1" example:"1"`
+	UserID   uuid.UUID `form:"user_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+}

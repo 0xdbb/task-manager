@@ -19,6 +19,8 @@ import (
 	"task-manager/internal/queue"
 	"task-manager/internal/server"
 	"time"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -46,17 +48,33 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
+	// -------Load Config-------
+
 	config, err := config.LoadConfig()
 	if err != nil {
 		panic(fmt.Sprintf("config error: %s", err))
 	}
 
-	newQueue, err := queue.NewQueueManager(config.RMQ_ADDRESS)
+	// -------Initialize QueueManager-------
+	newQm, err := queue.NewQueueManager(config.RMQ_ADDRESS)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("config error: %s", err))
 	}
 
-	server, err := server.NewServer(config, newQueue)
+	defer newQm.Close()
+
+	// -------Declare Queue-------
+	newQm.DeclareQueue(queue.QueueOptions{
+		Name:       "task_queue",
+		Durable:    true,
+		AutoDelete: false,
+		Exclusive:  false,
+		NoWait:     false,
+		Args:       amqp.Table{"x-max-priority": 10}, // Enable priority queue
+	})
+
+	// -------Initialize Server-------
+	server, err := server.NewServer(config, newQm)
 	if err != nil {
 		panic(fmt.Sprintf("config error: %s", err))
 	}

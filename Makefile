@@ -7,7 +7,7 @@ export
 ## build: build the application
 build:
 	@echo "Building..."
-	@go build -o main cmd/api/main.go
+	@go build -o ./bin/main cmd/api/main.go
 
 ## swag
 swag:
@@ -17,6 +17,9 @@ swag:
 run: 
 	@go run cmd/api/main.go
 	 
+run-worker:
+	@go run cmd/worker/main.go
+
 
 reset-db: goose-down goose-up
 

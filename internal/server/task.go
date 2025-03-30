@@ -2,41 +2,19 @@ package server
 
 import (
 	"errors"
+	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	db "task-manager/internal/database/sqlc"
 )
 
-// Task Types
-type CreateTaskRequest struct {
-	Title       string    `json:"title" binding:"required" example:"Image Processing"`
-	Type        string    `json:"type" binding:"required" example:"Image Processing"`
-	Description string    `json:"description" binding:"required" example:"Image Processing"`
-	UserID      uuid.UUID `json:"user_id" binding:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Priority    string    `json:"priority" binding:"required" example:"HIGH"`
-	Payload     string    `json:"payload" binding:"required" example:"{\"recipient\":\"user@example.com\",\"subject\":\"Welcome\",\"body\":\"Thanks for signing up!\"}"`
-	DueTime     time.Time `json:"due_date" binding:"required" example:"2025-03-30T12:00:00Z"`
-}
-
-type UpdateTaskRequest struct {
-	Status string `json:"status" example:"completed"`
-	Result string `json:"result" example:"2025-04-01T12:00:00Z"`
-}
-
-type TaskRequest struct {
-	ID uuid.UUID `uri:"id" binding:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
-}
-
-type TasksRequest struct {
-	PageSize int32     `form:"page_size" binding:"required,min=1" example:"10"`
-	PageID   int32     `form:"page_id" binding:"required,min=1" example:"1"`
-	UserID   uuid.UUID `form:"user_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-}
+const (
+	taskQueue   = "task_queue"
+	priorityMap = map[string]uint8{"HIGH": 10, "MEDIUM": 5, "LOW": 0}
+)
 
 // @Summary		Get all created Tasks
 // @Description	Get a list of all tasks with pagination. Supports filtering by passing `user_id` as a query parameter.
@@ -50,7 +28,7 @@ type TasksRequest struct {
 // @Failure		400			{object}	ErrorResponse
 // @Failure		500			{object}	ErrorResponse
 // @Router			/task [get]
-func (h *Server) GetTasks(ctx *gin.Context) {
+func (s *Server) GetTasks(ctx *gin.Context) {
 	if !isAdmin(ctx) {
 		return
 	}
@@ -66,7 +44,7 @@ func (h *Server) GetTasks(ctx *gin.Context) {
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
-	tasks, err := h.db.ListAllTasks(ctx, arg)
+	tasks, err := s.db.ListAllTasks(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error retrieving tasks"))
 		return
@@ -87,7 +65,7 @@ func (h *Server) GetTasks(ctx *gin.Context) {
 // @Failure		404	{object}	ErrorResponse
 // @Failure		500	{object}	ErrorResponse
 // @Router			/task/{id} [get]
-func (h *Server) GetTask(ctx *gin.Context) {
+func (s *Server) GetTask(ctx *gin.Context) {
 	if !isAdmin(ctx) {
 		return
 	}
@@ -98,7 +76,7 @@ func (h *Server) GetTask(ctx *gin.Context) {
 		return
 	}
 
-	task, err := h.db.GetTask(ctx, taskReq.ID)
+	task, err := s.db.GetTask(ctx, taskReq.ID)
 	if err != nil {
 		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, HandleError(err, http.StatusNotFound, "Task not found"))
@@ -122,7 +100,7 @@ func (h *Server) GetTask(ctx *gin.Context) {
 // @Failure		400		{object}	ErrorResponse
 // @Failure		500		{object}	ErrorResponse
 // @Router			/task [post]
-func (h *Server) CreateTask(ctx *gin.Context) {
+func (s *Server) CreateTask(ctx *gin.Context) {
 	if !isAdmin(ctx) {
 		return
 	}
@@ -133,19 +111,24 @@ func (h *Server) CreateTask(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: Publish to queue
+	err := s.queueManager.Publish(taskQueue, []byte(task.Payload), priorityMap[task.Priority])
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error Publishing Task to queue"))
+		return
+	}
+	log.Printf(" [x] Sent %s", task.Payload)
 
 	taskArg := db.CreateTaskParams{
 		UserID:      task.UserID,
 		Title:       task.Title,
 		Description: task.Description,
-		Type:        "DATA_PROCESSING", // or REPORT_GENERATION or DATA_LABELING or RESULT_REVIEW
+		Type:        task.Type, // DATA_PROCESSING or REPORT_GENERATION
 		Payload:     task.Payload,
 		DueTime:     task.DueTime,
-		Priority:    "High",
+		Priority:    db.TaskPriority(task.Priority),
 	}
 
-	createdTask, err := h.db.CreateTask(ctx, taskArg)
+	createdTask, err := s.db.CreateTask(ctx, taskArg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error creating task"))
 		return
@@ -166,7 +149,7 @@ func (h *Server) CreateTask(ctx *gin.Context) {
 // @Failure		400		{object}	ErrorResponse
 // @Failure		500		{object}	ErrorResponse
 // @Router			/task/{id}/status [patch]
-func (h *Server) UpdateTaskStatus(ctx *gin.Context) {
+func (s *Server) UpdateTaskStatus(ctx *gin.Context) {
 	if !isAdmin(ctx) {
 		return
 	}
@@ -193,7 +176,7 @@ func (h *Server) UpdateTaskStatus(ctx *gin.Context) {
 		Result: toPgTypeText(update.Result),
 	}
 
-	task, err := h.db.UpdateTaskStatus(ctx, taskArg)
+	task, err := s.db.UpdateTaskStatus(ctx, taskArg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error updating task"))
 		return
