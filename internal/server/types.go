@@ -52,13 +52,13 @@ type UserResponse struct {
 
 // Task Types
 type CreateTaskRequest struct {
-	Title       string    `json:"title" binding:"required" example:"Image Processing"`
-	Type        string    `json:"type" binding:"required" example:"Image Processing"`
-	Description string    `json:"description" binding:"required" example:"Image Processing"`
+	Title       string    `json:"title" binding:"required" example:"Data Processing"`
+	Type        string    `json:"type" binding:"required" example:"DATA_PROCESSING"`
+	Description string    `json:"description" binding:"required" example:"Process server generated logs"`
 	UserID      uuid.UUID `json:"user_id" binding:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
 	Priority    string    `json:"priority" binding:"required" example:"HIGH"`
 	Payload     string    `json:"payload" binding:"required" example:"{\"recipient\":\"user@example.com\",\"subject\":\"Welcome\",\"body\":\"Thanks for signing up!\"}"`
-	DueTime     time.Time `json:"due_date" binding:"required" example:"2025-03-30T12:00:00Z"`
+	DueTime     string    `json:"due_time" binding:"required" example:"2025-03-30T12:00:00Z"`
 }
 
 type UpdateTaskRequest struct {

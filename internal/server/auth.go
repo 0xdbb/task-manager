@@ -46,13 +46,13 @@ func (h *Server) Register(ctx *gin.Context) {
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: passwordHash,
-		Role: db.UserRole(user.Role),
+		Role:     db.UserRole(user.Role),
 	}
 
 	_, err = h.db.CreateUser(ctx, userArg)
 	if err != nil {
 		if db.ErrorCode(err) == db.UniqueViolation {
-			ctx.JSON(http.StatusForbidden, HandleError(err, http.StatusForbidden, "User with specified email already exists"))
+			ctx.JSON(http.StatusForbidden, HandleError(err, http.StatusForbidden, "Email already registered"))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error creating user"))

@@ -12,6 +12,7 @@ CREATE TABLE "session" (
 );
 
 ALTER TABLE "session" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE-- +goose StatementEnd
+-- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin

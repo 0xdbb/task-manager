@@ -17,7 +17,7 @@ const createTask = `-- name: CreateTask :one
 INSERT INTO "task" (
   user_id, title, description, result, type, payload, status, due_time, priority
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, 'pending', $7, $8
+  $1, $2, $3, $4, $5, $6, 'PENDING', $7, $8
 )
 RETURNING id, title, type, description, user_id, priority, payload, status, result, due_time, created_at, updated_at
 `

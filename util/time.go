@@ -1,6 +1,9 @@
 package util
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 func Now() time.Time {
 	return time.Now().UTC()
@@ -28,4 +31,13 @@ func DaysFromNowToTimeStamp(tok int64) int {
 
 func HumanReadableDate(timestamp int64) string {
 	return time.Unix(timestamp, 0).UTC().Format("Monday, 02 January 2006 15:04:05 MST")
+}
+
+// ParseTimeString parses an RFC3339 timestamp string into a time.Time object
+func ParseTimeString(timestamp string) (time.Time, error) {
+	parsedTime, err := time.Parse(time.RFC3339, timestamp)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("invalid timestamp format: %w", err)
+	}
+	return parsedTime, nil
 }

@@ -9,11 +9,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	db "task-manager/internal/database/sqlc"
+	"task-manager/util"
 )
 
-const (
+var (
 	taskQueue   = "task_queue"
-	priorityMap = map[string]uint8{"HIGH": 10, "MEDIUM": 5, "LOW": 0}
+	priorityMap = map[string]uint8{
+		"HIGH":   10,
+		"MEDIUM": 5,
+		"LOW":    0,
+	}
 )
 
 // @Summary		Get all created Tasks
@@ -110,29 +115,41 @@ func (s *Server) CreateTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request"))
 		return
 	}
+	log.Println(task)
 
-	err := s.queueManager.Publish(taskQueue, []byte(task.Payload), priorityMap[task.Priority])
+	dueTime, err := util.ParseTimeString(task.DueTime)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error Publishing Task to queue"))
+		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid time format"))
 		return
 	}
-	log.Printf(" [x] Sent %s", task.Payload)
 
+	log.Println(dueTime)
 	taskArg := db.CreateTaskParams{
 		UserID:      task.UserID,
 		Title:       task.Title,
 		Description: task.Description,
 		Type:        task.Type, // DATA_PROCESSING or REPORT_GENERATION
 		Payload:     task.Payload,
-		DueTime:     task.DueTime,
+		DueTime:     dueTime,
 		Priority:    db.TaskPriority(task.Priority),
 	}
 
 	createdTask, err := s.db.CreateTask(ctx, taskArg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error creating task"))
+		if db.ErrorCode(err) == db.ForeignKeyViolation {
+			ctx.JSON(http.StatusForbidden, HandleError(err, http.StatusForbidden, "UserID does not exist"))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error creating user"))
 		return
 	}
+
+	err = s.queueManager.Publish(taskQueue, []byte(task.Payload), priorityMap[task.Priority])
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error Publishing Task to queue"))
+		return
+	}
+	log.Printf(" [x] Sent %s", task.Payload)
 
 	ctx.JSON(http.StatusCreated, createdTask)
 }
@@ -168,12 +185,7 @@ func (s *Server) UpdateTaskStatus(ctx *gin.Context) {
 	}
 
 	taskArg := db.UpdateTaskStatusParams{
-		ID: taskReq.ID,
-		Status: db.NullTaskStatus{
-			TaskStatus: db.TaskStatus(update.Status),
-			Valid:      true,
-		},
-		Result: toPgTypeText(update.Result),
+		
 	}
 
 	task, err := s.db.UpdateTaskStatus(ctx, taskArg)

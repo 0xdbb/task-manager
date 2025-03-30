@@ -14,8 +14,8 @@ import (
 	"net/http"
 	"os/signal"
 	"syscall"
-	"task-manager/config"
 	_ "task-manager/docs/swagger" // Import generated Swagger docs
+	"task-manager/internal/config"
 	"task-manager/internal/queue"
 	"task-manager/internal/server"
 	"time"

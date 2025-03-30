@@ -1,6 +1,7 @@
 services:
   db:
     image: "postgis/postgis:15-3.4-alpine"
+    container_name: postgres-db
     environment:
       POSTGRES_USER: ${PGUSER}
       POSTGRES_PASSWORD: ${PGPASSWORD}
@@ -9,6 +10,25 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  rabbitmq:
+      image: rabbitmq:4.0-management  # Includes the management UI
+      container_name: rabbitmq
+      restart: unless-stopped
+      ports:
+        - "5672:5672"   # AMQP protocol port
+        - "15672:15672" # Management UI
+      environment:
+        RABBITMQ_DEFAULT_USER: guest
+        RABBITMQ_DEFAULT_PASS: guest
+      healthcheck:
+        test: ["CMD", "rabbitmqctl", "status"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+      volumes:
+        - rabbitmq_data:/var/lib/rabbitmq
+        - rabbitmq_log:/var/log/rabbitmq
 
 #  api:
 #    build:
@@ -30,4 +50,6 @@ services:
 
 volumes:
   pgdata:
-#  appdata:
+  rabbitmq_data:
+  rabbitmq_log:
+# appdata:

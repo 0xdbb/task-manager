@@ -637,7 +637,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "description",
-                "due_date",
+                "due_time",
                 "payload",
                 "priority",
                 "title",
@@ -647,27 +647,27 @@ const docTemplate = `{
             "properties": {
                 "description": {
                     "type": "string",
-                    "example": "Image Processing"
+                    "example": "Process server generated logs"
                 },
-                "due_date": {
+                "due_time": {
                     "type": "string",
                     "example": "2025-03-30T12:00:00Z"
                 },
                 "payload": {
                     "type": "string",
-                    "example": "Example payload"
+                    "example": "{\"recipient\":\"user@example.com\",\"subject\":\"Welcome\",\"body\":\"Thanks for signing up!\"}"
                 },
                 "priority": {
                     "type": "string",
-                    "example": "high"
+                    "example": "HIGH"
                 },
                 "title": {
                     "type": "string",
-                    "example": "Image Processing"
+                    "example": "Data Processing"
                 },
                 "type": {
                     "type": "string",
-                    "example": "Image Processing"
+                    "example": "DATA_PROCESSING"
                 },
                 "user_id": {
                     "type": "string",

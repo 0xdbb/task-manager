@@ -29,7 +29,7 @@ CREATE TABLE "task" (
   "result" TEXT,
   "due_time" TIMESTAMPTZ NOT NULL, 
   "created_at" TIMESTAMPTZ DEFAULT now(),
-  "updated_at" TIMESTAMPTZ,
+  "updated_at" TIMESTAMPTZ DEFAULT now(),
   FOREIGN KEY ("user_id") REFERENCES "user" ("id")
 );
 

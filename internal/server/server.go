@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"task-manager/config"
+	"task-manager/internal/config"
 	db "task-manager/internal/database/sqlc"
 	"task-manager/internal/queue"
 	"task-manager/internal/token"

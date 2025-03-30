@@ -3,29 +3,30 @@ definitions:
   internal_server.CreateTaskRequest:
     properties:
       description:
-        example: Image Processing
+        example: Process server generated logs
         type: string
-      due_date:
+      due_time:
         example: "2025-03-30T12:00:00Z"
         type: string
       payload:
-        example: Example payload
+        example: '{"recipient":"user@example.com","subject":"Welcome","body":"Thanks
+          for signing up!"}'
         type: string
       priority:
-        example: high
+        example: HIGH
         type: string
       title:
-        example: Image Processing
+        example: Data Processing
         type: string
       type:
-        example: Image Processing
+        example: DATA_PROCESSING
         type: string
       user_id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
     required:
     - description
-    - due_date
+    - due_time
     - payload
     - priority
     - title
