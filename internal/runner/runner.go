@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"os/signal"
-	"time"
 )
 
 // Runner runs a set of tasks within a given timeout and can be
@@ -16,8 +15,7 @@ type Runner struct {
 	interrupt chan os.Signal
 	// complete channel reports that processing is done.
 	complete chan error
-	// timeout reports that time has run out.
-	timeout <-chan time.Time
+
 	// tasks holds a set of functions that are executed
 	// synchronously in index order.
 	tasks []func(int)
@@ -30,12 +28,11 @@ var ErrTimeout = errors.New("received timeout")
 var ErrInterrupt = errors.New("received interrupt")
 
 // New returns a new ready-to-use Runner.
-func NewRunner(d time.Duration) *Runner {
+func New() *Runner {
 
 	return &Runner{
 		interrupt: make(chan os.Signal, 1),
 		complete:  make(chan error),
-		timeout:   time.After(d),
 	}
 }
 
@@ -56,14 +53,9 @@ func (r *Runner) Start() error {
 	go func() {
 		r.complete <- r.run()
 	}()
-	select {
+
 	// Signaled when processing is done.
-	case err := <-r.complete:
-		return err
-	// Signaled when we run out of time.
-	case <-r.timeout:
-		return ErrTimeout
-	}
+	return <-r.complete
 }
 
 // run executes each registered task.

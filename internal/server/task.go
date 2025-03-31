@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -143,8 +144,13 @@ func (s *Server) CreateTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error creating user"))
 		return
 	}
+	taskBytes, err := json.Marshal(task)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error serializing task request"))
+		return
+	}
 
-	err = s.queueManager.Publish(taskQueue, []byte(task.Payload), priorityMap[task.Priority])
+	err = s.queueManager.Publish(taskQueue, []byte(taskBytes), priorityMap[task.Priority])
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error Publishing Task to queue"))
 		return
@@ -184,9 +190,7 @@ func (s *Server) UpdateTaskStatus(ctx *gin.Context) {
 		return
 	}
 
-	taskArg := db.UpdateTaskStatusParams{
-		
-	}
+	taskArg := db.UpdateTaskStatusParams{}
 
 	task, err := s.db.UpdateTaskStatus(ctx, taskArg)
 	if err != nil {
