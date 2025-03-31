@@ -1,12 +1,11 @@
 package main
-// TODO: update status
-// TODO: Polling for task status
+
 // TODO: Rate limiting and Throttling
+// TODO: Polling for task status
 // TODO: write tests
 // TODO: deployment with docker and kubernetes
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -21,52 +20,6 @@ import (
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
-
-// TaskWorker processes tasks and updates the database.
-type TaskWorker struct {
-	task    amqp.Delivery
-	service *db.Service
-}
-
-// Task execution logic
-func (tw *TaskWorker) Task(ctx context.Context) {
-	taskID := string(tw.task.MessageId) // Assuming MessageId stores task UUID
-	log.Printf("Processing task ID: %s", taskID)
-
-	// Update task status to "IN_PROGRESS"
-	// err := tw.service.UpdateTaskStatus(context.Background(), db.UpdateTaskStatusParams{
-	// 	ID:     taskID,
-	// 	Status: "IN_PROGRESS",
-	// })
-	// if err != nil {
-	// 	log.Printf("Failed to update task status to IN_PROGRESS: %v", err)
-	// 	return
-	// }
-
-	// Simulate task processing
-	_ = processTask(tw.task.Body)
-
-	// Update task status to "COMPLETED" and store result
-	// _, err = tw.service.UpdateTaskStatus(context.Background(), db.UpdateTaskStatusParams{
-	// 	ID:     ,
-	// 	Status: db.NullTaskStatus{},
-	// 	Result: pgtype.Text{},
-	// })
-	// if err != nil {
-	// 	log.Printf("Failed to update task status to COMPLETED: %v", err)
-	// 	return
-	// }
-
-	// Acknowledge the message after successful processing
-	tw.task.Ack(false)
-}
-
-// processTask simulates task execution (modify this for real processing)
-func processTask(task []byte) string {
-	log.Printf("Processing task data: %s", task)
-	time.Sleep(2 * time.Second) // Simulate work delay
-	return fmt.Sprintf("Processed: %s", task)
-}
 
 func main() {
 	// ------- Load Config -------
@@ -135,7 +88,7 @@ func main() {
 	// Add tasks to the runner
 	r.Add(func(int) {
 		for t := range taskMsgs {
-			workerPool.Run(&TaskWorker{task: t, service: newService})
+			workerPool.Run(&worker.TaskWorker{Task: t, Service: newService})
 		}
 	})
 
@@ -157,4 +110,3 @@ func main() {
 	qm.Close()
 	log.Println("Shutdown complete.")
 }
-

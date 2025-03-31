@@ -32,7 +32,9 @@ func (s *Server) AuthRoutes(v1 *gin.RouterGroup) {
 }
 
 func (s *Server) AdminUserRoutes(v1 *gin.RouterGroup) {
-	AdminUserRouteGroup := v1.Group("/user").Use(AuthMiddleware(s.tokenMaker))
+	AdminUserRouteGroup := v1.Group("/user").
+		Use(AuthMiddleware(s.tokenMaker)).
+		Use(RateLimitMiddleware())
 	{
 		AdminUserRouteGroup.GET("/", s.GetUsers)
 		AdminUserRouteGroup.GET("/:id", s.GetUser)
@@ -42,7 +44,9 @@ func (s *Server) AdminUserRoutes(v1 *gin.RouterGroup) {
 }
 
 func (s *Server) TaskRoutes(v1 *gin.RouterGroup) {
-	taskRouteGroup := v1.Group("/task").Use(AuthMiddleware(s.tokenMaker))
+	taskRouteGroup := v1.Group("/task").
+		Use(AuthMiddleware(s.tokenMaker)).
+		Use(RateLimitMiddleware())
 	{
 		taskRouteGroup.GET("/", s.GetTasks)
 		taskRouteGroup.GET("/:id", s.GetTask)

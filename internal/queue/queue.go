@@ -37,9 +37,9 @@ type QueueManager struct {
 // NewQueueManager initializes a new QueueManager with exponential backoff
 func NewQueueManager(amqpURL string) (*QueueManager, error) {
 	var (
-		conn          *amqp.Connection
-		err           error
-		maxRetries    = 5
+		conn       *amqp.Connection
+		err        error
+		maxRetries = 5
 	)
 
 	for attempt := 0; attempt <= maxRetries; attempt++ {
@@ -50,7 +50,6 @@ func NewQueueManager(amqpURL string) (*QueueManager, error) {
 				conn.Close()
 				return nil, fmt.Errorf("failed to open channel: %w", err)
 			}
-
 
 			return &QueueManager{
 				conn:    conn,
@@ -80,27 +79,28 @@ func (qm *QueueManager) DeclareQueue(options QueueOptions) (amqp.Queue, error) {
 
 // Set QoS (Prefetch Count) - Ensures workers only take tasks when free
 func (qm *QueueManager) SetQos(prefetchCount, prefetchSize int, global bool) error {
-			return  qm.channel.Qos(
-				prefetchCount,
-				0,
-				false,
-			)
+	return qm.channel.Qos(
+		prefetchCount,
+		0,
+		false,
+	)
 }
 
 // Publish sends a message to the specified queue.
-func (qm *QueueManager) Publish(queueName string, body []byte, priority uint8) error {
+func (qm *QueueManager) Publish(queueName string, messageID string, body []byte, priority uint8) error {
 	return qm.channel.Publish(
 		"",        // Default exchange
 		queueName, // Routing key
 		false,     // Mandatory
 		false,     // Immediate
 		amqp.Publishing{
-			Headers:      map[string]interface{}{},
-			ContentType:  "application/json",
-			DeliveryMode: amqp.Persistent,
-			Priority:     priority,
-			Timestamp:    time.Now(),
-			Body:         body,
+			Headers:         map[string]interface{}{},
+			ContentType:     "application/json",
+			DeliveryMode:    amqp.Persistent,
+			Priority:        priority,
+			MessageId:       messageID,
+			Timestamp:       time.Now(),
+			Body:            body,
 		},
 	)
 }

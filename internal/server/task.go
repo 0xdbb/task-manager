@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -111,6 +110,15 @@ func (s *Server) CreateTask(ctx *gin.Context) {
 		return
 	}
 
+	// Apply rate limiting
+	userID := ctx.GetString("user_id") // Assume user_id is extracted from JWT
+	limiter := getRateLimiter(userID)
+
+	if !limiter.Allow() {
+		ctx.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests. Please slow down."})
+		return
+	}
+
 	var task CreateTaskRequest
 	if err := ctx.ShouldBindJSON(&task); err != nil {
 		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request"))
@@ -144,13 +152,14 @@ func (s *Server) CreateTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error creating user"))
 		return
 	}
-	taskBytes, err := json.Marshal(task)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error serializing task request"))
-		return
-	}
 
-	err = s.queueManager.Publish(taskQueue, []byte(taskBytes), priorityMap[task.Priority])
+	// taskBytes, err := json.Marshal(task)
+	// if err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error serializing task request"))
+	// 	return
+	// }
+
+	err = s.queueManager.Publish(taskQueue, createdTask.ID.String(), []byte(createdTask.Payload), priorityMap[task.Priority])
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error Publishing Task to queue"))
 		return

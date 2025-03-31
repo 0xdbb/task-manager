@@ -9,7 +9,7 @@ import (
 // Worker must be implemented by types that want to use
 // the work pool.
 type Worker interface {
-	Task(ctx context.Context)
+	DoTask(ctx context.Context)
 }
 
 // Pool provides a pool of goroutines that can execute any Worker
@@ -33,8 +33,8 @@ func New(maxGoroutines int, timeout time.Duration) *Pool {
 			for w := range p.work {
 				// Create a context with a timeout
 				ctx, cancel := context.WithTimeout(context.Background(), p.timeout)
-				w.Task(ctx) // Pass context to worker task
-				cancel()    // Ensure we release resources
+				w.DoTask(ctx) // Pass context to worker task
+				cancel()      // Ensure we release resources
 			}
 			p.wg.Done()
 		}()
@@ -53,4 +53,3 @@ func (p *Pool) Shutdown() {
 	close(p.work)
 	p.wg.Wait()
 }
-
