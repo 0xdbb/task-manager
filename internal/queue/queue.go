@@ -87,20 +87,19 @@ func (qm *QueueManager) SetQos(prefetchCount, prefetchSize int, global bool) err
 }
 
 // Publish sends a message to the specified queue.
-func (qm *QueueManager) Publish(queueName string, messageID string, body []byte, priority uint8) error {
+func (qm *QueueManager) Publish(queueName string, body []byte, priority uint8) error {
 	return qm.channel.Publish(
 		"",        // Default exchange
 		queueName, // Routing key
 		false,     // Mandatory
 		false,     // Immediate
 		amqp.Publishing{
-			Headers:         map[string]interface{}{},
-			ContentType:     "application/json",
-			DeliveryMode:    amqp.Persistent,
-			Priority:        priority,
-			MessageId:       messageID,
-			Timestamp:       time.Now(),
-			Body:            body,
+			Headers:      map[string]interface{}{},
+			ContentType:  "application/json",
+			DeliveryMode: amqp.Persistent,
+			Priority:     priority,
+			Timestamp:    time.Now(),
+			Body:         body,
 		},
 	)
 }

@@ -72,6 +72,9 @@ definitions:
       message:
         example: success
         type: string
+      task_id:
+        example: 1233-flf4djf-alsdik
+        type: string
     type: object
   internal_server.UpdateTaskRequest:
     properties:
@@ -216,14 +219,16 @@ definitions:
     - PENDING
     - IN-PROGRESS
     - FAILED
+    - COMPLETED
     type: string
     x-enum-varnames:
     - TaskStatusPENDING
     - TaskStatusINPROGRESS
     - TaskStatusFAILED
+    - TaskStatusCOMPLETED
 info:
   contact: {}
-  description: API documentation for CheapStores Service
+  description: API documentation for the task management service
   title: task-manager API
   version: "1.0"
 paths:
@@ -404,7 +409,7 @@ paths:
             $ref: '#/definitions/internal_server.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Create Task
+      summary: reate Task
       tags:
       - tasks
   /task/{id}:
@@ -443,6 +448,40 @@ paths:
       tags:
       - tasks
   /task/{id}/status:
+    get:
+      consumes:
+      - application/json
+      description: Wait until a task's status changes from PENDING before responding
+      parameters:
+      - description: Task ID (UUID format)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_server.Message'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_server.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_server.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Long Poll Task Status
+      tags:
+      - tasks
     patch:
       consumes:
       - application/json

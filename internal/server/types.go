@@ -61,13 +61,25 @@ type CreateTaskRequest struct {
 	DueTime     string    `json:"due_time" binding:"required" example:"2025-03-30T12:00:00Z"`
 }
 
+// Task Types
+type SendTaskPayload struct {
+	ID          uuid.UUID `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Title       string    `json:"title" example:"Data Processing"`
+	Type        string    `json:"type" example:"DATA_PROCESSING"`
+	Description string    `json:"description" example:"Process server generated logs"`
+	UserID      uuid.UUID `json:"user_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Priority    string    `json:"priority" example:"HIGH"`
+	Payload     string    `json:"payload" example:"{\"recipient\":\"user@example.com\",\"subject\":\"Welcome\",\"body\":\"Thanks for signing up!\"}"`
+	DueTime     time.Time `json:"due_time" example:"2025-03-30T12:00:00Z"`
+}
+
 type UpdateTaskRequest struct {
 	Status string `json:"status" example:"completed"`
 	Result string `json:"result" example:"2025-04-01T12:00:00Z"`
 }
 
 type TaskRequest struct {
-	ID uuid.UUID `uri:"id" binding:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ID string `uri:"id" binding:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
 }
 
 type TasksRequest struct {

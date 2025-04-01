@@ -9,6 +9,7 @@ type ErrorResponse struct {
 
 type Message struct {
 	Message string `json:"message" example:"success"`
+	TaskID string	`json:"task_id" binding:"omitempty" example:"1233-flf4djf-alsdik"`
 }
 
 func HandleError(err error, code int, message ...string) ErrorResponse {

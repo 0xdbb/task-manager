@@ -1,7 +1,5 @@
 package main
 
-// TODO: Rate limiting and Throttling
-// TODO: Polling for task status
 // TODO: write tests
 // TODO: deployment with docker and kubernetes
 
@@ -14,12 +12,28 @@ import (
 	"task-manager/internal/config"
 	db "task-manager/internal/database/sqlc"
 	"task-manager/internal/queue"
-	"task-manager/internal/runner"
 	"task-manager/internal/worker"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
+
+// TaskProcessor implements the worker.TaskProcessor interface
+type TaskProcessor struct {
+	service *db.Service
+}
+
+func (p *TaskProcessor) ProcessTask(body []byte) (string, error) {
+	// Implement your actual task processing logic here
+	// For example:
+	// 1. Parse the task payload
+	// 2. Perform the required operations (send email, generate report, etc.)
+	// 3. Return result or error
+
+	// Currently just logging and returning a success message
+	// log.Printf("Processing task: %s", string(body))
+	return "Task processed successfully", nil
+}
 
 func main() {
 	// ------- Load Config -------
@@ -33,7 +47,7 @@ func main() {
 	if config.PRODUCTION == "1" {
 		dbURL = config.DB_URL
 	}
-	newService := db.NewService(dbURL)
+	dbService := db.NewService(dbURL)
 
 	// ------- Initialize QueueManager -------
 	qm, err := queue.NewQueueManager(config.RMQ_ADDRESS)
@@ -75,38 +89,33 @@ func main() {
 		log.Fatalf("Failed to consume messages: %s", err)
 	}
 
-	// ------- Initialize Worker Pool -------
-	workerPool := worker.New(5, 30*time.Minute) // Pool with 5 sub-workers
+	// ------- Initialize Worker -------
+	taskProcessor := &TaskProcessor{service: dbService}
+	worker := worker.New(dbService, taskProcessor, 30*time.Minute)
+	worker.Consume(taskMsgs)
 
-	// ------- Initialize Runner for Graceful Shutdown -------
-	r := runner.New()
+	// ------- Graceful Shutdown Setup -------
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	// Capture termination signals
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
-
-	// Add tasks to the runner
-	r.Add(func(int) {
-		for t := range taskMsgs {
-			workerPool.Run(&worker.TaskWorker{Task: t, Service: newService})
-		}
-	})
-
-	// Start the runner in a separate goroutine
+	// ------- Start Worker in Goroutine -------
+	workerDone := make(chan error, 1)
 	go func() {
-		if err := r.Start(); err != nil {
-			log.Println("Runner stopped:", err)
-		}
+		log.Println("Worker started")
+		workerDone <- worker.Start()
 	}()
 
-	log.Println(" [*] Waiting for tasks. Press CTRL+C to exit.")
-
-	// Block until a termination signal is received
-	<-stop
-
-	// Shutdown gracefully
-	log.Println("Shutting down...")
-	workerPool.Shutdown()
-	qm.Close()
-	log.Println("Shutdown complete.")
+	// ------- Wait for Shutdown Signal -------
+	select {
+	case sig := <-quit:
+		log.Printf("Received signal: %v. Shutting down...", sig)
+		// Additional cleanup can be done here if needed
+		return
+	case err := <-workerDone:
+		if err != nil {
+			log.Printf("Worker stopped with error: %v", err)
+		} else {
+			log.Println("Worker stopped normally")
+		}
+	}
 }

@@ -62,6 +62,7 @@ const (
 	TaskStatusPENDING    TaskStatus = "PENDING"
 	TaskStatusINPROGRESS TaskStatus = "IN-PROGRESS"
 	TaskStatusFAILED     TaskStatus = "FAILED"
+	TaskStatusCOMPLETED  TaskStatus = "COMPLETED"
 )
 
 func (e *TaskStatus) Scan(src interface{}) error {

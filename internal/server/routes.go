@@ -50,6 +50,7 @@ func (s *Server) TaskRoutes(v1 *gin.RouterGroup) {
 	{
 		taskRouteGroup.GET("/", s.GetTasks)
 		taskRouteGroup.GET("/:id", s.GetTask)
+		taskRouteGroup.GET("/:id/status", s.LongPollTaskStatus)
 		taskRouteGroup.POST("/", s.CreateTask)
 		taskRouteGroup.PATCH("/:id", s.UpdateTaskStatus)
 	}

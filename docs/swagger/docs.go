@@ -257,7 +257,7 @@ const docTemplate = `{
                 "tags": [
                     "tasks"
                 ],
-                "summary": "Create Task",
+                "summary": "reate Task",
                 "parameters": [
                     {
                         "description": "Create Task Request",
@@ -347,6 +347,59 @@ const docTemplate = `{
             }
         },
         "/task/{id}/status": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Wait until a task's status changes from PENDING before responding",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Long Poll Task Status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task ID (UUID format)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_server.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "patch": {
                 "security": [
                     {
@@ -728,6 +781,10 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "success"
+                },
+                "task_id": {
+                    "type": "string",
+                    "example": "1233-flf4djf-alsdik"
                 }
             }
         },
@@ -937,12 +994,14 @@ const docTemplate = `{
             "enum": [
                 "PENDING",
                 "IN-PROGRESS",
-                "FAILED"
+                "FAILED",
+                "COMPLETED"
             ],
             "x-enum-varnames": [
                 "TaskStatusPENDING",
                 "TaskStatusINPROGRESS",
-                "TaskStatusFAILED"
+                "TaskStatusFAILED",
+                "TaskStatusCOMPLETED"
             ]
         }
     },
@@ -962,7 +1021,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "task-manager API",
-	Description:      "API documentation for CheapStores Service",
+	Description:      "API documentation for the task management service",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

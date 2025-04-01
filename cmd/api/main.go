@@ -1,6 +1,6 @@
 // @title           task-manager API
 // @version         1.0
-// @description     API documentation for CheapStores Service
+// @description     API documentation for the task management service
 // @BasePath /api/v1
 // @securityDefinitions.apikey BearerAuth
 // @in header

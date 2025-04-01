@@ -29,31 +29,10 @@ const (
 
 // AuthMiddleware creates a gin middleware for authorization
 func AuthMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
+return func(ctx *gin.Context) {
+		ctx.Set("tokenMaker", tokenMaker) // Store the token maker in the context
 
-		if len(authorizationHeader) == 0 {
-			err := errors.New("authorization header is not provided")
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, HandleError(err, http.StatusUnauthorized, "Invalid Token"))
-			return
-		}
-
-		fields := strings.Fields(authorizationHeader)
-		if len(fields) < 2 {
-			err := errors.New("invalid authorization header format")
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, HandleError(err, http.StatusUnauthorized, "Invalid Token"))
-			return
-		}
-
-		authorizationType := strings.ToLower(fields[0])
-		if authorizationType != authorizationTypeBearer {
-			err := fmt.Errorf("unsupported authorization type %s", authorizationType)
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, HandleError(err, http.StatusUnauthorized, "Invalid Token"))
-			return
-		}
-
-		accessToken := fields[1]
-		payload, err := tokenMaker.VerifyToken(accessToken)
+		payload, err := ExtractTokenPayload(ctx)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, HandleError(err, http.StatusUnauthorized, "Invalid Token"))
 			return
@@ -61,7 +40,34 @@ func AuthMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 
 		ctx.Set(authorizationPayloadKey, payload)
 		ctx.Next()
+	}}
+
+
+// ExtractTokenPayload extracts the token payload from the request context
+func ExtractTokenPayload(ctx *gin.Context) (*token.Payload, error) {
+	authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
+
+	if len(authorizationHeader) == 0 {
+		return nil, errors.New("authorization header is not provided")
 	}
+
+	fields := strings.Fields(authorizationHeader)
+	if len(fields) < 2 {
+		return nil, errors.New("invalid authorization header format")
+	}
+
+	authorizationType := strings.ToLower(fields[0])
+	if authorizationType != authorizationTypeBearer {
+		return nil, fmt.Errorf("unsupported authorization type %s", authorizationType)
+	}
+
+	accessToken := fields[1]
+	payload, err := ctx.MustGet("tokenMaker").(token.Maker).VerifyToken(accessToken)
+	if err != nil {
+		return nil, errors.New("invalid token")
+	}
+
+	return payload, nil
 }
 
 // getRateLimiter retrieves or creates a rate limiter for a given user
@@ -78,18 +84,17 @@ func getRateLimiter(userID string) *rate.Limiter {
 // Middleware for rate limiting
 func RateLimitMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userID := ctx.GetString("user_id") // Assume user_id is extracted from JWT or session
-
-		if userID == "" {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		payload, err := ExtractTokenPayload(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusUnauthorized, HandleError(err, http.StatusUnauthorized, "Unauthorized"))
 			ctx.Abort()
 			return
 		}
 
-		limiter := getRateLimiter(userID)
+		limiter := getRateLimiter(payload.UserID.String()) // Using extracted user ID
 
 		if !limiter.Allow() {
-			ctx.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests. Try again later."})
+			ctx.JSON(http.StatusTooManyRequests, HandleError(nil, http.StatusTooManyRequests, "Too many requests. Try again later."))
 			ctx.Abort()
 			return
 		}
@@ -97,3 +102,4 @@ func RateLimitMiddleware() gin.HandlerFunc {
 		ctx.Next()
 	}
 }
+
