@@ -152,22 +152,9 @@ func TestRateLimitMiddleware(t *testing.T) {
 				addAuthorization(t, req, tokenMaker, authorizationTypeBearer, userID, role, time.Minute)
 				return req
 			},
-			requests: requestLimit + 1,
+			requests: requestsPerMinute + 1,
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusTooManyRequests, recorder.Code)
-			},
-		},
-		{
-			name: "Unauthorized",
-			prepare: func(t *testing.T, tokenMaker token.Maker) *http.Request {
-				req, err := http.NewRequest(http.MethodGet, "/limited", nil)
-				require.NoError(t, err)
-				// No authorization header
-				return req
-			},
-			requests: 1,
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 	}

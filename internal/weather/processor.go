@@ -2,21 +2,21 @@ package weather
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 )
 
-
 // WeatherTaskPayload defines the structure for the weather task payload
 type WeatherTaskPayload struct {
 	Lat          float64 `json:"lat" binding:"required" example:"33.44"`
-	Long          float64 `json:"lon" binding:"required" example:"-94.04"`
+	Long         float64 `json:"lon" binding:"required" example:"-94.04"`
 	City         string  `json:"city" example:"Chicago"`
-	Units        string  `json:"units" example:"metric"` // "metric" or "imperial"
-	ForecastDays int     `json:"forecast_days" example:"3"` // Number of days to forecast (0 = current only)
+	Units        string  `json:"units" example:"metric"`            // "metric" or "imperial"
+	ForecastDays int     `json:"forecast_days" example:"3"`         // Number of days to forecast (0 = current only)
 	Exclude      string  `json:"exclude" example:"minutely,hourly"` // Optional: parts to exclude
-	Language     string  `json:"language" example:"en"` // Response language
+	Language     string  `json:"language" example:"en"`             // Response language
 }
 
 // WeatherResponse defines the complete API response structure
@@ -43,7 +43,7 @@ type WeatherResponse struct {
 		Weather    []Weather `json:"weather"`
 	} `json:"current"`
 	Minutely []struct {
-		Dt          int64   `json:"dt"`
+		Dt            int64   `json:"dt"`
 		Precipitation float64 `json:"precipitation"`
 	} `json:"minutely"`
 	Hourly []struct {
@@ -63,13 +63,13 @@ type WeatherResponse struct {
 		Pop        float64   `json:"pop"`
 	} `json:"hourly"`
 	Daily []struct {
-		Dt        int64     `json:"dt"`
-		Sunrise   int64     `json:"sunrise"`
-		Sunset    int64     `json:"sunset"`
-		Moonrise  int64     `json:"moonrise"`
-		Moonset   int64     `json:"moonset"`
-		MoonPhase float64   `json:"moon_phase"`
-		Summary   string    `json:"summary"`
+		Dt        int64   `json:"dt"`
+		Sunrise   int64   `json:"sunrise"`
+		Sunset    int64   `json:"sunset"`
+		Moonrise  int64   `json:"moonrise"`
+		Moonset   int64   `json:"moonset"`
+		MoonPhase float64 `json:"moon_phase"`
+		Summary   string  `json:"summary"`
 		Temp      struct {
 			Day   float64 `json:"day"`
 			Min   float64 `json:"min"`
@@ -84,17 +84,17 @@ type WeatherResponse struct {
 			Eve   float64 `json:"eve"`
 			Morn  float64 `json:"morn"`
 		} `json:"feels_like"`
-		Pressure   int       `json:"pressure"`
-		Humidity   int       `json:"humidity"`
-		DewPoint   float64   `json:"dew_point"`
-		WindSpeed  float64   `json:"wind_speed"`
-		WindDeg    int       `json:"wind_deg"`
-		WindGust   float64   `json:"wind_gust"`
-		Weather    []Weather `json:"weather"`
-		Clouds     int       `json:"clouds"`
-		Pop        float64   `json:"pop"`
-		Rain       float64   `json:"rain"`
-		Uvi        float64   `json:"uvi"`
+		Pressure  int       `json:"pressure"`
+		Humidity  int       `json:"humidity"`
+		DewPoint  float64   `json:"dew_point"`
+		WindSpeed float64   `json:"wind_speed"`
+		WindDeg   int       `json:"wind_deg"`
+		WindGust  float64   `json:"wind_gust"`
+		Weather   []Weather `json:"weather"`
+		Clouds    int       `json:"clouds"`
+		Pop       float64   `json:"pop"`
+		Rain      float64   `json:"rain"`
+		Uvi       float64   `json:"uvi"`
 	} `json:"daily"`
 	Alerts []struct {
 		SenderName  string   `json:"sender_name"`
@@ -135,11 +135,10 @@ func (p *WeatherProcessor) ProcessTask(body []byte) (string, error) {
 		return "", fmt.Errorf("invalid request format: %w", err)
 	}
 
-	if req.Lat == 0 || req.Long == 0 {
-		return "", fmt.Errorf("latitude and longitude are required")
+if err := validateWeatherRequest(req); err != nil {
+		return "", err
 	}
-
-	url := fmt.Sprintf("https://api.openweathermap.org/data/3.0/onecall?lat=%f&lon=%f&appid=%s&units=metric", 
+	url := fmt.Sprintf("https://api.openweathermap.org/data/3.0/onecall?lat=%f&lon=%f&appid=%s&units=metric",
 		req.Lat, req.Long, p.apiKey)
 
 	resp, err := p.client.Get(url)
@@ -180,4 +179,10 @@ func (p *WeatherProcessor) formatResponse(resp WeatherResponse, city string) str
 	}
 
 	return summary
+}
+func validateWeatherRequest(req WeatherTaskPayload) error {
+	if req.Lat == 0 || req.Long == 0 {
+		return errors.New("latitude and longitude are required")
+	}
+	return nil
 }

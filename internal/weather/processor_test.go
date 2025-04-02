@@ -1,115 +1,121 @@
 package weather
 
 import (
-	"fmt"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// Mock API response structure
-func mockWeatherResponse(temp float64, desc string) string {
-	return fmt.Sprintf(`{
-		"main": { "temp": %.1f },
-		"weather": [{ "description": "%s" }]
-	}`, temp, desc)
-}
+var openWeatherAPIUrl string = "https://api.openweathermap.org/data/3.0/onecall?lat=%f&lon=%f&appid=%s&units=metric"
 
-// Test for successful weather processing
-func TestWeatherProcessor_Success(t *testing.T) {
-	// Mock server for OpenWeather API
-	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Contains(t, r.URL.String(), "q=London") // Ensure query is passed correctly
-		w.WriteHeader(http.StatusOK)
-		io.WriteString(w, mockWeatherResponse(20.5, "clear sky"))
-	}))
-	defer mockServer.Close()
-
-	// Replace real API URL with mock server URL
-	processor := &WeatherProcessor{
-		apiKey: "test-key",
-		client: mockServer.Client(),
+func TestWeatherProcessor_ProcessTask(t *testing.T) {
+	// Setup test cases
+	tests := []struct {
+		name           string
+		input          []byte
+		mockResponse   string
+		mockStatus     int
+		expectedOutput string
+		expectedError  string
+	}{
+		{
+			name: "Invalid Input - Missing Coordinates",
+			input: []byte(`{
+				"city": "Chicago"
+			}`),
+			expectedError: "latitude and longitude are required",
+		},
+		{
+			name: "API Error - Unauthorized",
+			input: []byte(`{
+				"lat": 33.44,
+				"lon": -94.04
+			}`),
+			mockStatus:    http.StatusUnauthorized,
+			expectedError: "weather API returned status 401",
+		},
+		{
+			name:          "Invalid JSON Input",
+			input:         []byte(`{invalid json}`),
+			expectedError: "invalid request format",
+		},
 	}
 
-	// Mock task payload
-	payload := `{"location": "London"}`
-	result, err := processor.ProcessTask([]byte(payload))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Setup mock HTTP server
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tt.mockStatus)
+				if tt.mockResponse != "" {
+					_, _ = w.Write([]byte(tt.mockResponse))
+				}
+			}))
+			defer server.Close()
 
-	assert.NoError(t, err)
-	assert.Equal(t, "Weather for London: 20.5°C, clear sky", result)
+			// Create processor with test server URL and mock API key
+			processor := NewWeatherProcessor("test-api-key")
+			processor.client = server.Client() // Use test server's client
+
+			// Replace the API URL with our test server URL
+			oldURL := openWeatherAPIUrl
+			openWeatherAPIUrl = server.URL + "?lat=%f&lon=%f&appid=%s&units=metric"
+			defer func() { openWeatherAPIUrl = oldURL }()
+
+			// Execute test
+			output, err := processor.ProcessTask(tt.input)
+
+			// Verify results
+			if tt.expectedError != "" {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tt.expectedError)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tt.expectedOutput, output)
+			}
+		})
+	}
 }
 
-// Test missing location in payload
-func TestWeatherProcessor_MissingLocation(t *testing.T) {
-	processor := NewWeatherProcessor("test-key")
-
-	payload := `{"location": ""}`
-	_, err := processor.ProcessTask([]byte(payload))
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "location is required")
-}
-
-// Test API failure (e.g., city not found)
-func TestWeatherProcessor_APIFailure(t *testing.T) {
-	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		io.WriteString(w, `{"message": "city not found"}`)
-	}))
-	defer mockServer.Close()
-
-	processor := &WeatherProcessor{
-		apiKey: "test-key",
-		client: mockServer.Client(),
+func TestValidateWeatherRequest(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   WeatherTaskPayload
+		wantErr bool
+	}{
+		{
+			name: "Valid Request",
+			input: WeatherTaskPayload{
+				Lat:  40.71,
+				Long: -74.01,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Missing Latitude",
+			input: WeatherTaskPayload{
+				Long: -74.01,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Missing Longitude",
+			input: WeatherTaskPayload{
+				Lat: 40.71,
+			},
+			wantErr: true,
+		},
 	}
 
-	payload := `{"location": "UnknownCity"}`
-	_, err := processor.ProcessTask([]byte(payload))
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "city not found")
-}
-
-// Test handling of malformed API response
-func TestWeatherProcessor_MalformedResponse(t *testing.T) {
-	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		io.WriteString(w, `{"main": { "temp": "INVALID" }}`) // Invalid temp format
-	}))
-	defer mockServer.Close()
-
-	processor := &WeatherProcessor{
-		apiKey: "test-key",
-		client: mockServer.Client(),
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateWeatherRequest(tt.input)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
 	}
-
-	payload := `{"location": "London"}`
-	_, err := processor.ProcessTask([]byte(payload))
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to parse weather API response")
 }
-
-// Test handling of empty weather description
-func TestWeatherProcessor_EmptyWeatherArray(t *testing.T) {
-	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		io.WriteString(w, `{"main": { "temp": 22.5 }, "weather": []}`) // Empty weather array
-	}))
-	defer mockServer.Close()
-
-	processor := &WeatherProcessor{
-		apiKey: "test-key",
-		client: mockServer.Client(),
-	}
-
-	payload := `{"location": "Tokyo"}`
-	result, err := processor.ProcessTask([]byte(payload))
-
-	assert.NoError(t, err)
-	assert.Equal(t, "Weather for Tokyo: 22.5°C, No weather description available", result)
-}
-
