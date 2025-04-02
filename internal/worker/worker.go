@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -83,7 +84,7 @@ func (w *Worker) run() error {
 
 func (w *Worker) processTask(task amqp.Delivery) error {
 	// Parse task from message
-	t, err := parseTask(task.Body)
+	t, err := parseJson[db.Task](task.Body)
 	if err != nil {
 		w.logger.Printf("Failed to parse task: %v", err)
 		task.Nack(false, false) // Discard malformed message
@@ -95,19 +96,17 @@ func (w *Worker) processTask(task amqp.Delivery) error {
 	// Update status to IN_PROGRESS
 	if err := w.updateTaskStatus(t.ID, db.TaskStatusINPROGRESS, ""); err != nil {
 		w.logger.Printf("Failed to update task status: %v", err)
-		task.Nack(false, w.shouldRetry(err))
 		return err
 	}
 
 	// Process the task
-	result, err := w.processor.ProcessTask(task.Body)
+	result, err := w.processor.ProcessTask([]byte(t.Payload))
 	if err != nil {
 		w.logger.Printf("Task processing failed: %v", err)
 		// Update status to FAILED
 		if updateErr := w.updateTaskStatus(t.ID, db.TaskStatusFAILED, err.Error()); updateErr != nil {
 			w.logger.Printf("Failed to update failed task status: %v", updateErr)
 		}
-		task.Nack(false, w.shouldRetry(err))
 		return err
 	}
 
@@ -168,10 +167,48 @@ func (w *Worker) gotInterrupt() bool {
 	}
 }
 
-func parseTask(taskBytes []byte) (db.Task, error) {
-	var t db.Task
-	if err := json.Unmarshal(taskBytes, &t); err != nil {
-		return db.Task{}, fmt.Errorf("failed to unmarshal task body: %w", err)
+// parseJson is a generic function that unmarshals JSON data into a specified type.
+// It provides type-safe parsing with detailed error handling.
+func parseJson[T any](typeBytes []byte) (T, error) {
+	var zero T // Get the zero value of type T
+
+	// Early return for empty input
+	if len(typeBytes) == 0 {
+		return zero, fmt.Errorf("empty task data")
 	}
-	return t, nil
+
+	// Create a new instance of type T
+	var task T
+
+	// Unmarshal with strict decoding
+	decoder := json.NewDecoder(bytes.NewReader(typeBytes))
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(&task); err != nil {
+		// Enhanced error handling
+		var syntaxErr *json.SyntaxError
+		var unmarshalErr *json.UnmarshalTypeError
+
+		switch {
+		case errors.As(err, &syntaxErr):
+			return zero, fmt.Errorf("invalid JSON syntax at position %d: %w", syntaxErr.Offset, err)
+		case errors.As(err, &unmarshalErr):
+			return zero, fmt.Errorf("invalid type for field %q (expected %s, got %s): %w",
+				unmarshalErr.Field,
+				unmarshalErr.Type,
+				unmarshalErr.Value,
+				err)
+		default:
+			return zero, fmt.Errorf("failed to parse task: %w", err)
+		}
+	}
+
+	// Optional: Add validation if T implements a Validator interface
+	if validator, ok := any(task).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return zero, fmt.Errorf("task validation failed: %w", err)
+		}
+	}
+
+	return task, nil
 }

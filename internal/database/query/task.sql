@@ -32,18 +32,3 @@ RETURNING *;
 -- name: DeleteTask :exec
 DELETE FROM "task"
 WHERE id = $1;
-
-
--- TASK LOGS
-
--- name: GetTaskLog :many
-SELECT * FROM "task_log"
-WHERE task_id = $1
-ORDER BY created_at DESC;
-
--- name: CreateTaskLog :exec
-INSERT INTO "task_log" (
-  task_id, worker_id, status, message
-) VALUES (
-  $1, $2, $3, $4
-);

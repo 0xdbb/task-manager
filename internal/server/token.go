@@ -31,20 +31,20 @@ type renewAccessTokenResponse struct {
 // @Failure      404  {object}  ErrorResponse "Session not found"
 // @Failure      500  {object}  ErrorResponse "Internal server error"
 // @Router       /auth/renew [post]
-func (h *Server) RenewAccessToken(ctx *gin.Context) {
+func (s *Server) RenewAccessToken(ctx *gin.Context) {
 	var req renewAccessTokenRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, HandleError(err, http.StatusBadRequest, "Invalid request"))
 		return
 	}
 
-	refreshPayload, err := h.tokenMaker.VerifyToken(req.RefreshToken)
+	refreshPayload, err := s.tokenMaker.VerifyToken(req.RefreshToken)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, HandleError(err, http.StatusUnauthorized, "Invalid token"))
 		return
 	}
 
-	session, err := h.db.GetSession(ctx, refreshPayload.ID)
+	session, err := s.db.GetSession(ctx, refreshPayload.ID)
 	if err != nil {
 		if errors.Is(err, db.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, HandleError(err, http.StatusNotFound, "Session not found"))
@@ -78,10 +78,10 @@ func (h *Server) RenewAccessToken(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, accessPayload, err := h.tokenMaker.CreateToken(
+	accessToken, accessPayload, err := s.tokenMaker.CreateToken(
 		refreshPayload.UserID,
 		refreshPayload.Role,
-		h.config.ACCESS_TOKEN_DURATION,
+		s.config.AccessTokenDuration,
 	)
 
 	if err != nil {

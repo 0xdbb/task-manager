@@ -65,7 +65,7 @@ func (s *Server) SwaggerRoute(v1 *gin.RouterGroup) {
 
 func (s *Server) Cors() {
 
-	origins := strings.Split(s.config.ALLOWED_ORIGINS, ",")
+	origins := strings.Split(s.config.AllowedOrigins, ",")
 
 	s.engine.Use(cors.New(cors.Config{
 		AllowOrigins:     origins,

@@ -12,8 +12,8 @@ var (
 	r     = rand.New(rand.NewPCG(seed1, seed2))
 )
 
-// randomString generates a random string of length n
-func randomString(n int) string {
+// RandomString generates a random string of length n
+func RandomString(n int) string {
 	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	const l = len(letterBytes)
 	b := make([]byte, n)
@@ -42,16 +42,16 @@ func RandomPhone() string {
 
 func RandomEmail() string {
 	domains := []string{"gmail", "yahoo", "outlook"}
-	randomEmail := randomString(6)
+	randomEmail := RandomString(6)
 	return fmt.Sprintf("%s@%s.com", randomEmail, domains[r.IntN(len(domains))])
 }
 func RandomAddress() string {
-	return randomString(10)
+	return RandomString(10)
 
 }
 
 func RandomName() string {
-	return randomString(5)
+	return RandomString(5)
 }
 
 func RandomPassword() string {

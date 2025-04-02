@@ -39,7 +39,7 @@ var (
 // @Failure		500			{object}	ErrorResponse
 // @Router			/task [get]
 func (s *Server) GetTasks(ctx *gin.Context) {
-	if !isAdmin(ctx) {
+	if !isUserRoleAllowed(ctx, db.UserRoleADMIN) {
 		return
 	}
 
@@ -76,7 +76,7 @@ func (s *Server) GetTasks(ctx *gin.Context) {
 // @Failure		500	{object}	ErrorResponse
 // @Router			/task/{id} [get]
 func (s *Server) GetTask(ctx *gin.Context) {
-	if !isAdmin(ctx) {
+	if !isUserRoleAllowed(ctx, db.UserRoleSTANDARD) {
 		return
 	}
 
@@ -129,7 +129,7 @@ func (s *Server) LongPollTaskStatus(ctx *gin.Context) {
 		return
 	}
 
-	timeout := 30 // seconds
+	timeout := 60 // seconds
 	for i := 0; i < timeout; i++ {
 		task, err := s.db.GetTask(ctx, taskID)
 		if err != nil {
@@ -146,6 +146,7 @@ func (s *Server) LongPollTaskStatus(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, Message{
 				TaskID:  task.ID.String(),
 				Message: fmt.Sprintf("Task status updated - %v", task.Status),
+				Result: task.Result.String,
 			})
 			return
 		}
@@ -158,7 +159,7 @@ func (s *Server) LongPollTaskStatus(ctx *gin.Context) {
 	ctx.JSON(http.StatusRequestTimeout, HandleError(nil, http.StatusRequestTimeout, "Task is still pending, try again later"))
 }
 
-// @Summary		reate Task
+// @Summary		Create Task
 // @Description	Create a new task
 // @Tags			tasks
 // @Accept			json
@@ -170,7 +171,7 @@ func (s *Server) LongPollTaskStatus(ctx *gin.Context) {
 // @Failure		500		{object}	ErrorResponse
 // @Router			/task [post]
 func (s *Server) CreateTask(ctx *gin.Context) {
-	if !isAdmin(ctx) {
+	if !isUserRoleAllowed(ctx, db.UserRoleSTANDARD) {
 		return
 	}
 
@@ -256,7 +257,7 @@ func (s *Server) CreateTask(ctx *gin.Context) {
 // @Failure		500		{object}	ErrorResponse
 // @Router			/task/{id}/status [patch]
 func (s *Server) UpdateTaskStatus(ctx *gin.Context) {
-	if !isAdmin(ctx) {
+	if !isUserRoleAllowed(ctx, db.UserRoleADMIN) {
 		return
 	}
 

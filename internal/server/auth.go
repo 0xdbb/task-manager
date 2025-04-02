@@ -97,7 +97,7 @@ func (h *Server) Login(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, accessPayload, err := h.tokenMaker.CreateToken(user.ID, string(user.Role), h.config.ACCESS_TOKEN_DURATION)
+	accessToken, accessPayload, err := h.tokenMaker.CreateToken(user.ID, string(user.Role), h.config.AccessTokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error creating access token"))
 		return
@@ -105,7 +105,7 @@ func (h *Server) Login(ctx *gin.Context) {
 	refreshToken, refreshPayload, err := h.tokenMaker.CreateToken(
 		user.ID,
 		string(user.Role),
-		h.config.REFRESH_TOKEN_DURATION,
+		h.config.RefreshTokenDuration,
 	)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error creating refresh token"))
@@ -138,15 +138,27 @@ func (h *Server) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
-func isAdmin(ctx *gin.Context) bool {
+func isUserRoleAllowed(ctx *gin.Context, role db.UserRole) bool {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-
 	userRole := strings.ToUpper(authPayload.Role)
-	if userRole != string(db.UserRoleADMIN) {
-		ctx.JSON(http.StatusForbidden, HandleError(nil, http.StatusForbidden, "Forbidden: Admins only"))
+
+	// Ensure user role is a valid role
+	if userRole != string(db.UserRoleADMIN) && userRole != string(db.UserRoleSTANDARD) {
+		ctx.JSON(http.StatusForbidden, HandleError(nil, http.StatusForbidden, "Forbidden: Invalid Role"))
 		ctx.Abort()
 		return false
 	}
 
+	// If the required role is ADMIN, only allow ADMINs
+	if role == db.UserRoleADMIN && userRole != string(db.UserRoleADMIN) {
+		ctx.JSON(http.StatusForbidden, HandleError(nil, http.StatusForbidden, "Forbidden: Unauthorized"))
+		ctx.Abort()
+		return false
+	}
+
+	// Otherwise, allow both Standard Users and Admins
 	return true
 }
+
+
+

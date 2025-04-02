@@ -31,10 +31,10 @@ func NewServer(config *config.Config, queueManager *queue.QueueManager) (*http.S
 
 	mode := gin.DebugMode
 
-	dburl := config.DB_URL_DEV
+	dburl := config.DbUrlDev
 
-	if config.PRODUCTION == "1" {
-		dburl = config.DB_URL
+	if config.Production == "1" {
+		dburl = config.DbUrl
 		mode = gin.ReleaseMode
 
 	}
@@ -42,7 +42,7 @@ func NewServer(config *config.Config, queueManager *queue.QueueManager) (*http.S
 	gin.SetMode(mode)
 
 	// ----Create JWT Maker-----
-	tokenMaker, err := token.NewJWTMaker(config.TOKEN_SECRET)
+	tokenMaker, err := token.NewJWTMaker(config.TokenSecret)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error creating token maker %w", err)
@@ -74,7 +74,7 @@ func NewServer(config *config.Config, queueManager *queue.QueueManager) (*http.S
 
 	NewServer.RegisterRoutes()
 
-	port := fmt.Sprintf(":%s", config.PORT)
+	port := fmt.Sprintf(":%s", config.Port)
 
 	log.Printf("------Server spinning on Port %s-------\n", port)
 

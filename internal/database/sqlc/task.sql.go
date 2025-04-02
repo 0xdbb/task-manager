@@ -62,31 +62,6 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 	return i, err
 }
 
-const createTaskLog = `-- name: CreateTaskLog :exec
-INSERT INTO "task_log" (
-  task_id, worker_id, status, message
-) VALUES (
-  $1, $2, $3, $4
-)
-`
-
-type CreateTaskLogParams struct {
-	TaskID   uuid.UUID   `json:"task_id"`
-	WorkerID pgtype.Text `json:"worker_id"`
-	Status   TaskStatus  `json:"status"`
-	Message  pgtype.Text `json:"message"`
-}
-
-func (q *Queries) CreateTaskLog(ctx context.Context, arg CreateTaskLogParams) error {
-	_, err := q.db.Exec(ctx, createTaskLog,
-		arg.TaskID,
-		arg.WorkerID,
-		arg.Status,
-		arg.Message,
-	)
-	return err
-}
-
 const deleteTask = `-- name: DeleteTask :exec
 DELETE FROM "task"
 WHERE id = $1
@@ -120,41 +95,6 @@ func (q *Queries) GetTask(ctx context.Context, id uuid.UUID) (Task, error) {
 		&i.UpdatedAt,
 	)
 	return i, err
-}
-
-const getTaskLog = `-- name: GetTaskLog :many
-
-SELECT id, task_id, worker_id, status, message, created_at FROM "task_log"
-WHERE task_id = $1
-ORDER BY created_at DESC
-`
-
-// TASK LOGS
-func (q *Queries) GetTaskLog(ctx context.Context, taskID uuid.UUID) ([]TaskLog, error) {
-	rows, err := q.db.Query(ctx, getTaskLog, taskID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []TaskLog{}
-	for rows.Next() {
-		var i TaskLog
-		if err := rows.Scan(
-			&i.ID,
-			&i.TaskID,
-			&i.WorkerID,
-			&i.Status,
-			&i.Message,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const listAllTasks = `-- name: ListAllTasks :many

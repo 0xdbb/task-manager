@@ -3,23 +3,22 @@ definitions:
   internal_server.CreateTaskRequest:
     properties:
       description:
-        example: Process server generated logs
+        example: Fetch current weather data for specified location
         type: string
       due_time:
         example: "2025-03-30T12:00:00Z"
         type: string
       payload:
-        example: '{"recipient":"user@example.com","subject":"Welcome","body":"Thanks
-          for signing up!"}'
+        example: '{"lat":33.44,"lon":-94.04,"city":"Chicago","units":"metric","forecast_days":3}'
         type: string
       priority:
         example: HIGH
         type: string
       title:
-        example: Data Processing
+        example: Weather Data Fetch
         type: string
       type:
-        example: DATA_PROCESSING
+        example: WEATHER_FETCH
         type: string
       user_id:
         example: 123e4567-e89b-12d3-a456-426614174000
@@ -409,7 +408,7 @@ paths:
             $ref: '#/definitions/internal_server.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: reate Task
+      summary: Create Task
       tags:
       - tasks
   /task/{id}:

@@ -56,7 +56,7 @@ func main() {
 	}
 
 	// -------Initialize QueueManager-------
-	newQm, err := queue.NewQueueManager(config.RMQ_ADDRESS)
+	newQm, err := queue.NewQueueManager(config.RMQAddress)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("config error: %s", err))
 	}

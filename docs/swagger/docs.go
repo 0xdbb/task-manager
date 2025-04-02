@@ -257,7 +257,7 @@ const docTemplate = `{
                 "tags": [
                     "tasks"
                 ],
-                "summary": "reate Task",
+                "summary": "Create Task",
                 "parameters": [
                     {
                         "description": "Create Task Request",
@@ -700,7 +700,7 @@ const docTemplate = `{
             "properties": {
                 "description": {
                     "type": "string",
-                    "example": "Process server generated logs"
+                    "example": "Fetch current weather data for specified location"
                 },
                 "due_time": {
                     "type": "string",
@@ -708,7 +708,7 @@ const docTemplate = `{
                 },
                 "payload": {
                     "type": "string",
-                    "example": "{\"recipient\":\"user@example.com\",\"subject\":\"Welcome\",\"body\":\"Thanks for signing up!\"}"
+                    "example": "{\"lat\":33.44,\"lon\":-94.04,\"city\":\"Chicago\",\"units\":\"metric\",\"forecast_days\":3}"
                 },
                 "priority": {
                     "type": "string",
@@ -716,11 +716,11 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string",
-                    "example": "Data Processing"
+                    "example": "Weather Data Fetch"
                 },
                 "type": {
                     "type": "string",
-                    "example": "DATA_PROCESSING"
+                    "example": "WEATHER_FETCH"
                 },
                 "user_id": {
                     "type": "string",

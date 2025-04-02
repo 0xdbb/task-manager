@@ -11,15 +11,16 @@ import (
 
 // Config holds the configuration values from environment variables.
 type Config struct {
-	DB_URL                 string
-	DB_URL_DEV             string
-	RMQ_ADDRESS            string
-	PRODUCTION             string
-	PORT                   string
-	TOKEN_SECRET           string
-	ACCESS_TOKEN_DURATION  time.Duration
-	REFRESH_TOKEN_DURATION time.Duration
-	ALLOWED_ORIGINS        string
+	DbUrl                string
+	DbUrlDev             string
+	RMQAddress           string
+	Production           string
+	Port                 string
+	TokenSecret          string
+	AccessTokenDuration  time.Duration
+	RefreshTokenDuration time.Duration
+	AllowedOrigins       string
+	WeatherApiKey        string
 }
 
 // LoadConfig loads environment variables from the specified file paths (if provided) or defaults to `.env`.
@@ -52,15 +53,16 @@ func LoadConfig(paths ...string) (*Config, error) {
 
 	// Populate the Config struct
 	config := &Config{
-		DB_URL:                 os.Getenv("DB_URL"),
-		DB_URL_DEV:             os.Getenv("DB_URL_DEV"),
-		PRODUCTION:             os.Getenv("PRODUCTION"),
-		PORT:                   os.Getenv("PORT"),
-		TOKEN_SECRET:           os.Getenv("TOKEN_SECRET"),
-		ACCESS_TOKEN_DURATION:  accessTokenDuration,
-		REFRESH_TOKEN_DURATION: refreshTokenDuration,
-		RMQ_ADDRESS:            os.Getenv("RMQ_ADDRESS"),
-		ALLOWED_ORIGINS:        os.Getenv("ALLOWED_ORIGINS"),
+		DbUrl:                os.Getenv("DB_URL"),
+		DbUrlDev:             os.Getenv("DB_URL_DEV"),
+		Production:           os.Getenv("PRODUCTION"),
+		Port:                 os.Getenv("PORT"),
+		TokenSecret:          os.Getenv("TOKEN_SECRET"),
+		AccessTokenDuration:  accessTokenDuration,
+		RefreshTokenDuration: refreshTokenDuration,
+		RMQAddress:           os.Getenv("RMQ_ADDRESS"),
+		AllowedOrigins:       os.Getenv("ALLOWED_ORIGINS"),
+		WeatherApiKey:        os.Getenv("WEATHER_API_KEY"),
 	}
 
 	// Validate required environment variables
@@ -74,26 +76,29 @@ func LoadConfig(paths ...string) (*Config, error) {
 
 // validateConfig checks that all required environment variables are set.
 func validateConfig(config *Config) error {
-	if config.DB_URL == "" {
+	if config.DbUrl == "" {
 		return errors.New("missing required environment variable: DB_URL")
 	}
-	if config.ACCESS_TOKEN_DURATION == 0 {
+	if config.WeatherApiKey == "" {
+		return errors.New("missing required environment variable: WEATHER_API_KEY")
+	}
+	if config.AccessTokenDuration == 0 {
 		return errors.New("missing or invalid required environment variable: ACCESS_TOKEN_DURATION")
 	}
 
-	if config.REFRESH_TOKEN_DURATION == 0 {
+	if config.RefreshTokenDuration == 0 {
 		return errors.New("missing or invalid required environment variable: REFRESH_TOKEN_DURATION")
 	}
 
-	if config.RMQ_ADDRESS == "" {
+	if config.RMQAddress == "" {
 		return errors.New("missing or invalid required environment variable: RMQ_ADDRESS")
 	}
 
-	if config.PORT == "" {
+	if config.Port == "" {
 		return errors.New("missing required environment variable: PORT")
 	}
 
-	if config.ALLOWED_ORIGINS == "" {
+	if config.AllowedOrigins == "" {
 		return errors.New("missing required environment variable: ALLOWED_ORIGINS")
 	}
 

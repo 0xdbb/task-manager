@@ -1,6 +1,7 @@
 package main
 
 // TODO: write tests
+// TODO: call goose in code
 // TODO: deployment with docker and kubernetes
 
 import (
@@ -12,6 +13,7 @@ import (
 	"task-manager/internal/config"
 	db "task-manager/internal/database/sqlc"
 	"task-manager/internal/queue"
+	"task-manager/internal/weather"
 	"task-manager/internal/worker"
 	"time"
 
@@ -19,21 +21,6 @@ import (
 )
 
 // TaskProcessor implements the worker.TaskProcessor interface
-type TaskProcessor struct {
-	service *db.Service
-}
-
-func (p *TaskProcessor) ProcessTask(body []byte) (string, error) {
-	// Implement your actual task processing logic here
-	// For example:
-	// 1. Parse the task payload
-	// 2. Perform the required operations (send email, generate report, etc.)
-	// 3. Return result or error
-
-	// Currently just logging and returning a success message
-	// log.Printf("Processing task: %s", string(body))
-	return "Task processed successfully", nil
-}
 
 func main() {
 	// ------- Load Config -------
@@ -43,14 +30,14 @@ func main() {
 	}
 
 	// ------- Initialize Database Service -------
-	dbURL := config.DB_URL_DEV
-	if config.PRODUCTION == "1" {
-		dbURL = config.DB_URL
+	dbURL := config.DbUrlDev
+	if config.Production == "1" {
+		dbURL = config.DbUrl
 	}
 	dbService := db.NewService(dbURL)
 
 	// ------- Initialize QueueManager -------
-	qm, err := queue.NewQueueManager(config.RMQ_ADDRESS)
+	qm, err := queue.NewQueueManager(config.RMQAddress)
 	if err != nil {
 		log.Fatalf("Queue error: %s", err)
 	}
@@ -90,8 +77,8 @@ func main() {
 	}
 
 	// ------- Initialize Worker -------
-	taskProcessor := &TaskProcessor{service: dbService}
-	worker := worker.New(dbService, taskProcessor, 30*time.Minute)
+	weatherProcessor := weather.NewWeatherProcessor(config.WeatherApiKey)
+	worker := worker.New(dbService, weatherProcessor, 30*time.Minute)
 	worker.Consume(taskMsgs)
 
 	// ------- Graceful Shutdown Setup -------

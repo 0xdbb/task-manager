@@ -52,12 +52,12 @@ type UserResponse struct {
 
 // Task Types
 type CreateTaskRequest struct {
-	Title       string    `json:"title" binding:"required" example:"Data Processing"`
-	Type        string    `json:"type" binding:"required" example:"DATA_PROCESSING"`
-	Description string    `json:"description" binding:"required" example:"Process server generated logs"`
+	Title       string    `json:"title" binding:"required" example:"Weather Data Fetch"`
+	Type        string    `json:"type" binding:"required" example:"WEATHER_FETCH"`
+	Description string    `json:"description" binding:"required" example:"Fetch current weather data for specified location"`
 	UserID      uuid.UUID `json:"user_id" binding:"required" example:"123e4567-e89b-12d3-a456-426614174000"`
 	Priority    string    `json:"priority" binding:"required" example:"HIGH"`
-	Payload     string    `json:"payload" binding:"required" example:"{\"recipient\":\"user@example.com\",\"subject\":\"Welcome\",\"body\":\"Thanks for signing up!\"}"`
+	Payload     string    `json:"payload" binding:"required" example:"{\"lat\":33.44,\"lon\":-94.04,\"city\":\"Chicago\",\"units\":\"metric\",\"forecast_days\":3}"`
 	DueTime     string    `json:"due_time" binding:"required" example:"2025-03-30T12:00:00Z"`
 }
 

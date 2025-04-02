@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync"
 	"task-manager/internal/token"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
@@ -21,15 +20,14 @@ const (
 	authorizationTypeBearer = "bearer"
 	authorizationPayloadKey = "authorization_payload"
 
-	// Rate limit settings (5 requests per minute per user)
-	requestLimit  = 5
-	timeInterval  = time.Minute
-	burstCapacity = 2 // Allow small bursts
+	// Rate limit settings (10 requests per minute)
+	requestsPerMinute = 10
+	burstCapacity     = 10 // Same as limit for strict control
 )
 
 // AuthMiddleware creates a gin middleware for authorization
 func AuthMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
-return func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
 		ctx.Set("tokenMaker", tokenMaker) // Store the token maker in the context
 
 		payload, err := ExtractTokenPayload(ctx)
@@ -40,8 +38,8 @@ return func(ctx *gin.Context) {
 
 		ctx.Set(authorizationPayloadKey, payload)
 		ctx.Next()
-	}}
-
+	}
+}
 
 // ExtractTokenPayload extracts the token payload from the request context
 func ExtractTokenPayload(ctx *gin.Context) (*token.Payload, error) {
@@ -74,32 +72,41 @@ func ExtractTokenPayload(ctx *gin.Context) (*token.Payload, error) {
 func getRateLimiter(userID string) *rate.Limiter {
 	limiter, exists := rateLimiters.Load(userID)
 	if !exists {
-		rl := rate.NewLimiter(rate.Every(timeInterval/time.Duration(requestLimit)), burstCapacity)
+		// Create a limiter that allows 10 requests per minute with a burst of 10
+		rl := rate.NewLimiter(rate.Limit(requestsPerMinute)/60, burstCapacity)
 		rateLimiters.Store(userID, rl)
 		return rl
 	}
 	return limiter.(*rate.Limiter)
 }
 
-// Middleware for rate limiting
+// RateLimitMiddleware should be placed BEFORE AuthMiddleware in your chain
 func RateLimitMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		payload, err := ExtractTokenPayload(ctx)
-		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, HandleError(err, http.StatusUnauthorized, "Unauthorized"))
-			ctx.Abort()
-			return
+		// Try to extract user ID without full auth
+		userID := "unauthorized" // Default for unauthenticated requests
+
+		// Lightweight extraction of just the token (no verification yet)
+		if authHeader := ctx.GetHeader(authorizationHeaderKey); authHeader != "" {
+			fields := strings.Fields(authHeader)
+			if len(fields) == 2 && strings.ToLower(fields[0]) == authorizationTypeBearer {
+				if tokenMaker, exists := ctx.Get("tokenMaker"); exists {
+					if payload, err := tokenMaker.(token.Maker).VerifyToken(fields[1]); err == nil {
+						userID = payload.UserID.String()
+					}
+				}
+			}
 		}
 
-		limiter := getRateLimiter(payload.UserID.String()) // Using extracted user ID
-
+		limiter := getRateLimiter(userID)
 		if !limiter.Allow() {
-			ctx.JSON(http.StatusTooManyRequests, HandleError(nil, http.StatusTooManyRequests, "Too many requests. Try again later."))
+			ctx.JSON(http.StatusTooManyRequests, gin.H{
+				"error":   "rate limit exceeded",
+				"message": fmt.Sprintf("Limit: %d requests per minute", requestsPerMinute),
+			})
 			ctx.Abort()
 			return
 		}
-
 		ctx.Next()
 	}
 }
-
