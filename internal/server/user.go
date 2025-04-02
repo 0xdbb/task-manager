@@ -62,7 +62,7 @@ func (h *Server) GetUsers(ctx *gin.Context) {
 // @Failure		500	{object}	ErrorResponse
 // @Router			/user/{id} [get]
 func (h *Server) GetUser(ctx *gin.Context) {
-		if !isUserRoleAllowed(ctx, db.UserRoleADMIN) {
+	if !isUserRoleAllowed(ctx, db.UserRoleADMIN) {
 		return
 	}
 
@@ -100,7 +100,7 @@ func (h *Server) GetUser(ctx *gin.Context) {
 // @Failure  500  {object}  ErrorResponse
 // @Router   /user/{id}/role [patch]
 func (h *Server) UpdateUserRole(ctx *gin.Context) {
-		if !isUserRoleAllowed(ctx, db.UserRoleADMIN) {
+	if !isUserRoleAllowed(ctx, db.UserRoleADMIN) {
 		return
 	}
 	var req UpdateUserRoleRequest
@@ -148,7 +148,7 @@ func (h *Server) UpdateUserRole(ctx *gin.Context) {
 // @Failure  500  {object}  ErrorResponse
 // @Router   /user/{id} [delete]
 func (h *Server) DeleteUser(ctx *gin.Context) {
-		if !isUserRoleAllowed(ctx, db.UserRoleADMIN) {
+	if !isUserRoleAllowed(ctx, db.UserRoleADMIN) {
 		return
 	}
 	id := ctx.Param("id")

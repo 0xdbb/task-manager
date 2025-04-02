@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -65,10 +64,7 @@ func (s *Server) SwaggerRoute(v1 *gin.RouterGroup) {
 
 func (s *Server) Cors() {
 
-	origins := strings.Split(s.config.AllowedOrigins, ",")
-
 	s.engine.Use(cors.New(cors.Config{
-		AllowOrigins:     origins,
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

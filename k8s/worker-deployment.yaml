@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-manager-worker
+  labels:
+    app: task-manager-worker
+spec:
+  replicas: 2  # Adjust based on workload
+  selector:
+    matchLabels:
+      app: task-manager-worker
+  template:
+    metadata:
+      labels:
+        app: task-manager-worker
+    spec:
+      containers:
+        - name: worker
+          image: dennislazy/task-manager-worker:latest
+          envFrom:
+            - configMapRef:
+                name: task-manager-config
+            - secretRef:
+                name: task-manager-secrets
+          command: ["/app/worker"]
+

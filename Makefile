@@ -42,31 +42,38 @@ goose-down:
 # Manage DB containers
 ## up: create and start the database container
 up:
-	docker compose up -d
+	docker compose up -d --build
 
 ## down: stop and remove the database container
 down:
 	docker compose down -v
 
+
+
+# Replace "your-dockerhub-username" with your actual Docker Hub username
+docker-build:
+	docker build -t dennislazy/task-manager-api:latest -t dennislazy/task-manager:v1 .
+
+docker-push:
+	docker push dennislazy/task-manager:latest
+
 ## sqlc: generate SQL code using sqlc
 sqlc:
 	sqlc generate
 
-# Manage Docker containers
-## docker-down: shutdown DB container (fallback to Docker Compose V1 if needed)
-docker-down:
-	@if docker compose down 2>/dev/null; then \
-		: ; \
-	else \
-		echo "Falling back to Docker Compose V1"; \
-		docker-compose down; \
-	fi
+apply-depl:
+	kubectl apply -f ./k8s/api-deployment.yaml
+	kubectl apply -f ./k8s/worker-deployment.yaml
+	kubectl apply -f ./k8s/postgres.yaml
+	kubectl apply -f ./k8s/rabbitmq.yaml
+	kubectl apply -f ./k8s/config-secrets.yaml
+	kubectl apply -f ./k8s/hpa.yaml
 
 # Testing
 ## test: run all tests
 test:
 	@echo "Testing..."
-	@go test -cover ./... -v 
+	@go test ./... -v 
 
 ## itest: run integration tests
 itest:

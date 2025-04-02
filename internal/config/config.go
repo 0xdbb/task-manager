@@ -19,17 +19,16 @@ type Config struct {
 	TokenSecret          string
 	AccessTokenDuration  time.Duration
 	RefreshTokenDuration time.Duration
-	AllowedOrigins       string
 	WeatherApiKey        string
 }
 
 // LoadConfig loads environment variables from the specified file paths (if provided) or defaults to `.env`.
 // It returns a Config struct populated with the required environment variables.
-func LoadConfig(paths ...string) (*Config, error) {
+func LoadConfig(path ...string) (*Config, error) {
 	// Default to .env if no path is provided
-	envFile := ".env"
-	if len(paths) > 0 {
-		envFile = paths[0]
+	envFile := "app.env"
+	if len(path) > 0 {
+		envFile = path[0]
 	}
 
 	// Load environment variables from the .env file
@@ -61,7 +60,6 @@ func LoadConfig(paths ...string) (*Config, error) {
 		AccessTokenDuration:  accessTokenDuration,
 		RefreshTokenDuration: refreshTokenDuration,
 		RMQAddress:           os.Getenv("RMQ_ADDRESS"),
-		AllowedOrigins:       os.Getenv("ALLOWED_ORIGINS"),
 		WeatherApiKey:        os.Getenv("WEATHER_API_KEY"),
 	}
 
@@ -96,10 +94,6 @@ func validateConfig(config *Config) error {
 
 	if config.Port == "" {
 		return errors.New("missing required environment variable: PORT")
-	}
-
-	if config.AllowedOrigins == "" {
-		return errors.New("missing required environment variable: ALLOWED_ORIGINS")
 	}
 
 	return nil
