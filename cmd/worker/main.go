@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -89,6 +90,15 @@ func main() {
 	go func() {
 		log.Println("Worker started")
 		workerDone <- worker.Start()
+	}()
+
+	go func() {
+		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Worker is healthy"))
+		})
+		log.Println("Worker health check running on port 8001")
+		log.Fatal(http.ListenAndServe("0.0.0.0:8001", nil))
 	}()
 
 	// ------- Wait for Shutdown Signal -------
