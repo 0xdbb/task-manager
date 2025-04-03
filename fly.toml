@@ -23,11 +23,11 @@ primary_region = "ams"
   worker = "worker/main"
 
 # Worker-specific settings
-[services.for.processes.worker]
+[services.for_processes.worker]
   protocol = "tcp"  # Workers typically don't need HTTP
   
   # Worker health checks (TCP)
-  [[services.for.processes.worker.tcp_checks]]
+  [[services.for_processes.worker.tcp_checks]]
     interval = "30s"
     timeout = "5s"
     grace_period = "15s"
@@ -50,6 +50,7 @@ primary_region = "ams"
   memory_mb = 1024
 
   # Optional: Different specs for workers
-  [[vm.for.processes.worker]]
+  [[vm.for_processes.worker]]
     memory_mb = 2048  # Workers get 2GB if needed
     cpus = 2
+
