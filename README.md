@@ -43,25 +43,6 @@ The core functionality includes:
    - Containerized services: `api`, `worker`, `postgres-db`, `rabbitmq`.
    - Kubernetes manifests provided for production-ready scaling.
 
-### Diagram
-```mermaid
-graph TD
-    A[User] -->|HTTP Requests| B[API:8000]
-    B -->|Publishes Tasks| C[RabbitMQ:task-queue]
-    C -->|Consumes| D[Worker]
-    C -->|Retries Failed Tasks| E[RabbitMQ:task-retry]
-    D -->|Updates Status| F[PostgreSQL]
-    E -->|Requeues| D
-    B -->|Reads/Writes| F
-    A -->|Swagger UI| G[API Docs]
-    F -->|Polls Status| B
-    B -->|Returns Updates| A
-
-    subgraph "Real-Time (Polling)"
-        F --> A
-    end
-``````
-
 ### Prerequisites
 
 Ensure you have the following installed:
