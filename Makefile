@@ -51,6 +51,9 @@ up:
 down:
 	docker compose down -v
 
+test:
+	go test -v ./...
+
 # watch: live reload using air (installs air if not available)
 watch:
 	@if command -v air > /dev/null; then \
