@@ -10,7 +10,6 @@ To handle millions of users and tasks, the system is designed with scalability a
 - **Queue**:
   - **RabbitMQ Clustering**: Scale RabbitMQ horizontally by deploying a cluster with mirrored queues across nodes, ensuring high availability and fault tolerance. Use a load balancer to distribute producer/consumer traffic.
   - **Kafka Alternative**: For even higher throughput and durability, consider migrating to Apache Kafka. Kafka’s partitioned topics and consumer groups would allow parallel task processing at scale, with built-in retention for auditing.
-  - **Monitoring**: Implement queue depth monitoring (e.g., via RabbitMQ’s management plugin or Kafka’s metrics) to detect bottlenecks and trigger scaling actions.
 
 - **Workers**:
   - **Kubernetes Deployment**: Deploy workers as a Kubernetes Deployment with multiple replicas, auto-scaling based on queue depth (e.g., using KEDA with RabbitMQ queue length as a metric). This ensures workers dynamically adjust to workload spikes.
@@ -20,7 +19,6 @@ To handle millions of users and tasks, the system is designed with scalability a
 - **API**:
   - **Load Balancing**: Use NGINX as a reverse proxy to distribute HTTP requests across multiple API instances, ensuring even load and failover. Configure sticky sessions if needed for WebSocket upgrades.
   - **Caching**: Integrate Redis to cache task statuses and frequently accessed user data (e.g., TTL of 30 seconds), reducing database load. Use Redis Pub/Sub for future real-time enhancements.
-  - **Rate Limiting**: Enforce API throttling (e.g., via NGINX or `gin` middleware) to protect against abuse, setting higher limits for authenticated users based on role (e.g., admins get priority).
 
 - **Microservices**:
   - **Monolith to Microservices**: Transition from a monolithic architecture to microservices to decouple components (e.g., authentication, task management, worker processing). This allows independent scaling—workers might need more CPU, while the API might need more memory—and simplifies updates.
