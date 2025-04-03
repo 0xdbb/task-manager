@@ -71,6 +71,28 @@ definitions:
       message:
         example: success
         type: string
+      result:
+        example: |-
+          Task processed successfully
+          Weather for Chicago (33.44,-94.04):
+          - Current: 25.6°C, overcast clouds
+          - Feels like: 26.1°C
+          - Humidity: 73%
+          - Wind: 7.7 m/s, 200°
+
+          Alerts:
+          - Flood Watch: * WHAT...Flooding caused by excessive rainfall continues to be possible.
+
+          * WHERE...Portions of south central and southwest Arkansas,
+          including the following counties, in south central Arkansas,
+          Union. In southwest Arkansas, Columbia, Lafayette and Miller.
+
+          * WHEN...From this evening through Sunday morning.
+
+          * IMPACTS...Excessive runoff may result in flooding of rivers,
+          creeks, streams, and other low-lying and flood-prone locations.
+          Creeks and streams may rise out of their banks.
+        type: string
       task_id:
         example: 1233-flf4djf-alsdik
         type: string

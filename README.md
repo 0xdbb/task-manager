@@ -10,6 +10,7 @@ Built with:
 - PostgreSQL
 - RabbitMQ
 - Docker
+- Kubernetes
 
 
 The core functionality includes:

@@ -775,6 +775,10 @@
                     "type": "string",
                     "example": "success"
                 },
+                "result": {
+                    "type": "string",
+                    "example": "Task processed successfully\nWeather for Chicago (33.44,-94.04):\n- Current: 25.6°C, overcast clouds\n- Feels like: 26.1°C\n- Humidity: 73%\n- Wind: 7.7 m/s, 200°\n\nAlerts:\n- Flood Watch: * WHAT...Flooding caused by excessive rainfall continues to be possible.\n\n* WHERE...Portions of south central and southwest Arkansas,\nincluding the following counties, in south central Arkansas,\nUnion. In southwest Arkansas, Columbia, Lafayette and Miller.\n\n* WHEN...From this evening through Sunday morning.\n\n* IMPACTS...Excessive runoff may result in flooding of rivers,\ncreeks, streams, and other low-lying and flood-prone locations.\nCreeks and streams may rise out of their banks."
+                },
                 "task_id": {
                     "type": "string",
                     "example": "1233-flf4djf-alsdik"

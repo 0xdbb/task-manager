@@ -9,7 +9,7 @@ CREATE TYPE task_priority AS ENUM ('LOW', 'MEDIUM', 'HIGH');
 
 CREATE TABLE "user" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  "name" VARCHAR NOT NULL CHECK (LENGTH(name) > 0),
+  "name" VARCHAR NOT NULL CHECK (LENGTH("name") > 0),
   "email" VARCHAR UNIQUE NOT NULL,
   "password" VARCHAR NOT NULL,
   "role" user_role NOT NULL,

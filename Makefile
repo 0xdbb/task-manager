@@ -20,6 +20,8 @@ run:
 run-worker:
 	@go run cmd/worker/main.go
 
+sqlc:
+	sqlc generate
 
 reset-db: goose-down goose-up
 
