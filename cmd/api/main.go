@@ -55,8 +55,16 @@ func main() {
 		panic(fmt.Sprintf("config error: %s", err))
 	}
 
+	fmt.Println(config.DbUrl)
+	fmt.Println(config.RMQAddress)
+	rmqAddress := config.RMQAddressDev
+
+	if config.Production == "1" {
+		rmqAddress = config.RMQAddress
+	}
+
 	// -------Initialize QueueManager-------
-	newQm, err := queue.NewQueueManager(config.RMQAddress)
+	newQm, err := queue.NewQueueManager(rmqAddress)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("config error: %s", err))
 	}

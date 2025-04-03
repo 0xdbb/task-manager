@@ -1,9 +1,5 @@
 package main
 
-// TODO: write tests
-// TODO: call goose in code
-// TODO: deployment with docker and kubernetes
-
 import (
 	"fmt"
 	"log"
@@ -31,13 +27,16 @@ func main() {
 
 	// ------- Initialize Database Service -------
 	dbURL := config.DbUrlDev
+	rmqAddress := config.RMQAddressDev
+
 	if config.Production == "1" {
 		dbURL = config.DbUrl
+		rmqAddress = config.RMQAddress
 	}
 	dbService := db.NewService(dbURL)
 
 	// ------- Initialize QueueManager -------
-	qm, err := queue.NewQueueManager(config.RMQAddress)
+	qm, err := queue.NewQueueManager(rmqAddress)
 	if err != nil {
 		log.Fatalf("Queue error: %s", err)
 	}

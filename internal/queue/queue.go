@@ -58,7 +58,7 @@ func NewQueueManager(amqpURL string) (*QueueManager, error) {
 		}
 
 		backoffDuration := time.Duration(1<<attempt) * time.Second
-		fmt.Printf("Connection attempt %d failed; retrying in %v\n", attempt+1, backoffDuration)
+		fmt.Printf("RMQ Connection attempt %d failed; retrying in %v\n", attempt+1, backoffDuration)
 		time.Sleep(backoffDuration)
 	}
 

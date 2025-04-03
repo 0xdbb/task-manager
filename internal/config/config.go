@@ -14,6 +14,7 @@ type Config struct {
 	DbUrl                string
 	DbUrlDev             string
 	RMQAddress           string
+	RMQAddressDev        string
 	Production           string
 	Port                 string
 	TokenSecret          string
@@ -60,6 +61,7 @@ func LoadConfig(path ...string) (*Config, error) {
 		AccessTokenDuration:  accessTokenDuration,
 		RefreshTokenDuration: refreshTokenDuration,
 		RMQAddress:           os.Getenv("RMQ_ADDRESS"),
+		RMQAddressDev:        os.Getenv("RMQ_ADDRESS_DEV"),
 		WeatherApiKey:        os.Getenv("WEATHER_API_KEY"),
 	}
 
@@ -90,6 +92,10 @@ func validateConfig(config *Config) error {
 
 	if config.RMQAddress == "" {
 		return errors.New("missing or invalid required environment variable: RMQ_ADDRESS")
+	}
+
+	if config.RMQAddressDev == "" {
+		return errors.New("missing or invalid required environment variable: RMQ_ADDRESS_DEV")
 	}
 
 	if config.Port == "" {
