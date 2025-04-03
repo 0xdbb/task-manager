@@ -26,7 +26,7 @@ The core functionality includes:
 1. **API Service** (Golang):
    - Built with the `gin` framework for lightweight, fast routing.
    - Endpoints for authentication (`/auth/*`), user management (`/user/`) and task management (`/task/*`).
-   - Publishes task with priority creation events to RabbitMQ.
+   -Publishes task creation events with priority to RabbitMQ. 
 
 2. **Database** (PostgreSQL):
    - Stores users (with roles) and tasks. See database docs: [Database Docs](https://dbdocs.io/dennisboachie9/task-management-system)
@@ -59,7 +59,7 @@ graph TD
 
     subgraph "Real-Time (Polling)"
         F --> A
-    end## Installation
+    end
 ``````
 
 ### Prerequisites
@@ -108,16 +108,13 @@ task-manager/
    ```sh
    git clone git@github.com:0xdbb/task-manager.git
    cd task-manager
-
-
+   ````
 
 1. Start the application. This should build and/or pull required images.
    ```sh
     make up
-
-	
     ````
-    Check out `Makefile` for more comands
+    Check out `Makefile` for more commands
 
     - Here 4 containers will be started
         - worker
@@ -130,7 +127,11 @@ task-manager/
 4.  You can visit the rabbitmq management UI at [ui](http://localhost:15672/) in your browser to view docs
 
 ### System test flow
-To test api with swagger docs:
+<!--
+ !   ╭───────────────────────────────────────────────────────╮
+ !   │ To test api with swagger docs:                        │
+ !   ╰───────────────────────────────────────────────────────╯
+-->
 
 1. **Register**:
     - register user as ADMIN first using example data  at `/auth/register` .
@@ -140,11 +141,11 @@ To test api with swagger docs:
 
 
 3. **Set Authorization Header**:
-    - In Swagger, click "Authorize" and enter Bearer <access_token>.  
+    - In Swagger, click "Authorize" and enter Bearer `<access_token>`.  
 
 4. **Create Task**:
     - Let's skip over to `tasks` section. Create task at POST `/task`. 
-You need to copy id of logged in admin from `/auth/login` section and store in example request body. 
+Copy the ID of the logged-in admin from the `/auth/login` response and use it in the example request body.
 
 5. **Poll Task Status**:
     - Once task is created, you can head over to `/task/{id}/status` to poll database for change in task status.
@@ -156,7 +157,6 @@ Workers will process the task (status transitions: `pending` → `in-progress` �
     - Worker: Claim and process tasks (internal role, not user-facing).
 
 ## Deliverables
-- API Docs: Swagger UI at /api/v1/docs.
+- API Docs: Swagger UI at [localhost](http://localhost:8000/api/v1).
 - Tests: Unit tests (`make test`) cover authentication and task logic; integration tests in tests/.
 - Deployment: Dockerized services; live demo at [api](https://task-manager-6x3jxg.fly.dev/api/v1)
-- To access prod database 

@@ -92,14 +92,7 @@ func main() {
 		workerDone <- worker.Start()
 	}()
 
-	go func() {
-		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Worker is healthy"))
-		})
-		log.Println("Worker health check running on port 8001")
-		log.Fatal(http.ListenAndServe("0.0.0.0:8001", nil))
-	}()
+	go runHeathCheckServer()
 
 	// ------- Wait for Shutdown Signal -------
 	select {
@@ -114,4 +107,14 @@ func main() {
 			log.Println("Worker stopped normally")
 		}
 	}
+}
+
+func runHeathCheckServer() {
+		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Worker is healthy"))
+		})
+		log.Println("Worker health check running on port 8001")
+		log.Fatal(http.ListenAndServe("0.0.0.0:8001", nil))
+
 }
