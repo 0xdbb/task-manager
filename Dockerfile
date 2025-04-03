@@ -2,6 +2,8 @@
 FROM golang:1.23.8-alpine3.20 AS builder
 
 WORKDIR /app
+# Install goose (Database Migration Tool)
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # Copy go mod files first and download dependencies (for caching)
 COPY go.mod go.sum ./
@@ -25,11 +27,19 @@ RUN apk --no-cache add ca-certificates
 # Copy the built binaries
 COPY --from=builder /app/main /app/main
 COPY --from=builder /app/worker /app/worker
+COPY .env ./
+
+# Copy goose binary from the builder stage
+COPY --from=builder /go/bin/goose /usr/local/bin/goose
+COPY .env ./
+COPY Makefile ./
+COPY entrypoint.sh /app/entrypoint.sh
+COPY internal/database/migrations/ /app/internal/database/migrations
+RUN chmod +x /app/entrypoint.sh
 
 # Expose the port for the API
-EXPOSE 8080
+EXPOSE 8000
 
-# Allow the container to run API or worker dynamically
 ENTRYPOINT []
-CMD ["/app/main"]
 
+CMD ["/app/main"]

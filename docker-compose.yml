@@ -39,14 +39,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: task-mngt-api
+    container_name: task-manager-api
     depends_on:
       postgres-db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "8000:8000"
     env_file:
       - .env
     restart: unless-stopped
@@ -56,7 +56,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: task-mngt-worker
+    container_name: task-manager-worker
     depends_on:
       postgres-db:
         condition: service_healthy

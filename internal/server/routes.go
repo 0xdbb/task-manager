@@ -65,6 +65,7 @@ func (s *Server) SwaggerRoute(v1 *gin.RouterGroup) {
 func (s *Server) Cors() {
 
 	s.engine.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

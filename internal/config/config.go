@@ -26,7 +26,7 @@ type Config struct {
 // It returns a Config struct populated with the required environment variables.
 func LoadConfig(path ...string) (*Config, error) {
 	// Default to .env if no path is provided
-	envFile := "app.env"
+	envFile := ".env"
 	if len(path) > 0 {
 		envFile = path[0]
 	}
