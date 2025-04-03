@@ -140,4 +140,4 @@ Workers will process the task (status transitions: `pending` â†’ `in-progress` â
 ## Deliverables
 - API Docs: Swagger UI at [localhost](http://localhost:8000/api/v1).
 - Tests: Unit tests (`make test`) cover authentication and task logic; integration tests in tests/.
-- Deployment: Dockerized services; live demo at [api](https://task-manager-6x3jxg.fly.dev/api/v1)
+- Deployment: Dockerized services; live demo at [api](https://task-manager-6x3jxg.fly.dev/api/v1/)
