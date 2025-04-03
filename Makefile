@@ -54,6 +54,22 @@ down:
 test:
 	go test -v ./...
 
+apply-depl:
+	kubectl apply -f ./k8s/api-deployment.yaml
+	kubectl apply -f ./k8s/worker-deployment.yaml
+	kubectl apply -f ./k8s/postgres.yaml
+	kubectl apply -f ./k8s/rabbitmq.yaml
+	kubectl apply -f ./k8s/config-secrets.yaml
+	kubectl apply -f ./k8s/hpa.yaml
+
+
+docker-build:
+	docker build -t dennislazy/task-manager-api:latest -f Dockerfile  .
+	# docker build -t dennislazy/task-manager-worker:latest -f Dockerfile --target worker .
+	#
+docker-push:
+	docker push dennislazy/task-manager-service:latest
+
 # watch: live reload using air (installs air if not available)
 watch:
 	@if command -v air > /dev/null; then \

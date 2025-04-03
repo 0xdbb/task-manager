@@ -64,9 +64,6 @@ services:
         condition: service_healthy
     env_file:
       - .env
-    deploy:
-      mode: replicated
-      endpoint_mode: vip
     restart: unless-stopped
     command: ["/app/worker"]
 

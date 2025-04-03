@@ -125,10 +125,9 @@ task-manager/
         - postgres-db
         - rabbitmq
 
-3. visit http://localhost:8000/api/v1 in your browser to view docs
-   ```sh
-    make up
+3. visit [localhost](http://localhost:8000/api/v1) in your browser to view docs
 
+4.  You can visit the rabbitmq management UI at [ui](http://localhost:15672/) in your browser to view docs
 
 ### System test flow
 To test api with swagger docs:

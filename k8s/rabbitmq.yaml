@@ -34,12 +34,12 @@ spec:
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
                 secretKeyRef:
-                  name: task-mngt-secrets
+                  name: task-manager-secrets
                   key: rabbitmq_user
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
                 secretKeyRef:
-                  name: task-mngt-secrets
+                  name: task-manager-secrets
                   key: rabbitmq_pass
           volumeMounts:
             - name: rabbitmq-storage

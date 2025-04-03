@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: task-mngt-api
+  name: task-manager-api
   labels:
-    app: task-mngt-api
+    app: task-manager-api
 spec:
   replicas: 2  # Can be increased for scaling
   selector:
     matchLabels:
-      app: task-mngt-api
+      app: task-manager-api
   template:
     metadata:
       labels:
-        app: task-mngt-api
+        app: task-manager-api
     spec:
       containers:
         - name: api
-          image: your-dockerhub-username/task-mngt-api:latest
+          image: your-dockerhub-username/task-manager-api:latest
           ports:
             - containerPort: 8000
           envFrom:
             - configMapRef:
-                name: task-mngt-config
+                name: task-manager-config
             - secretRef:
-                name: task-mngt-secrets
+                name: task-manager-secrets
           readinessProbe:
             httpGet:
               path: /health
@@ -40,10 +40,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: task-mngt-api
+  name: task-manager-api
 spec:
   selector:
-    app: task-mngt-api
+    app: task-manager-api
   ports:
     - protocol: TCP
       port: 80
