@@ -102,7 +102,7 @@ func (s *Server) GetTask(ctx *gin.Context) {
 	}
 	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	// If user is 
+	// If user is
 	if payload.Role != string(db.UserRoleADMIN) && task.UserID != payload.UserID {
 		ctx.JSON(http.StatusUnauthorized, HandleError(err, http.StatusUnauthorized, "Unathorized to view task"))
 		return
@@ -152,8 +152,8 @@ func (s *Server) LongPollTaskStatus(ctx *gin.Context) {
 		if task.Status.TaskStatus != db.TaskStatusPENDING {
 			ctx.JSON(http.StatusOK, Message{
 				TaskID:  task.ID.String(),
-				Message: fmt.Sprintf("Task status updated - %v", task.Status),
-				Result: task.Result.String,
+				Message: fmt.Sprintf("Task status updated - %v", task.Status.TaskStatus),
+				Result:  task.Result.String,
 			})
 			return
 		}

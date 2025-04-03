@@ -83,7 +83,6 @@ func (w *Worker) run() error {
 }
 
 func (w *Worker) processTask(task amqp.Delivery) error {
-	// Parse task from message
 	t, err := parseJson[db.Task](task.Body)
 	if err != nil {
 		w.logger.Printf("Failed to parse task: %v", err)
@@ -99,14 +98,24 @@ func (w *Worker) processTask(task amqp.Delivery) error {
 		return err
 	}
 
-	// Process the task
-	result, err := w.processor.ProcessTask([]byte(t.Payload))
-	if err != nil {
-		w.logger.Printf("Task processing failed: %v", err)
-		// Update status to FAILED
-		if updateErr := w.updateTaskStatus(t.ID, db.TaskStatusFAILED, err.Error()); updateErr != nil {
-			w.logger.Printf("Failed to update failed task status: %v", updateErr)
+	// Implement retry logic
+	const maxRetries = 3
+	var result string
+	for i := 0; i < maxRetries; i++ {
+		result, err = w.processor.ProcessTask([]byte(t.Payload))
+		if err == nil {
+			break // Exit loop if processing succeeds
 		}
+
+		w.logger.Printf("Task processing failed (attempt %d/%d): %v", i+1, maxRetries, err)
+		time.Sleep(time.Duration(2<<i) * time.Second) // Exponential backoff (2s, 4s, 8s)
+	}
+
+	// If all attempts failed, mark task as failed
+	if err != nil {
+		w.logger.Printf("Task permanently failed after %d attempts: %v", maxRetries, err)
+		_ = w.updateTaskStatus(t.ID, db.TaskStatusFAILED, err.Error())
+		task.Nack(false, false) // Do not retry
 		return err
 	}
 
