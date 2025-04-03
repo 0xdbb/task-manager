@@ -40,17 +40,13 @@ Ensure you have the following installed:
 
 
 
-1. Start the application.
+1. Start the application. This should build and/or pull required images
    ```sh
     make up
 
 	
-2. Run database migrations
 
-   ```sh
-    make goose-up
-
-3. afsdfasd
+3. 
    ```sh
     make up
 
