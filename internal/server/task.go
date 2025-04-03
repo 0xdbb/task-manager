@@ -100,6 +100,13 @@ func (s *Server) GetTask(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, HandleError(err, http.StatusInternalServerError, "Error retrieving task"))
 		return
 	}
+	payload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	// If user is 
+	if payload.Role != string(db.UserRoleADMIN) && task.UserID != payload.UserID {
+		ctx.JSON(http.StatusUnauthorized, HandleError(err, http.StatusUnauthorized, "Unathorized to view task"))
+		return
+	}
 
 	ctx.JSON(http.StatusOK, task)
 }
