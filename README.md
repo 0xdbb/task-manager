@@ -25,8 +25,8 @@ The core functionality includes:
 ### Components
 1. **API Service** (Golang):
    - Built with the `gin` framework for lightweight, fast routing.
-   - Endpoints for authentication (`/auth/*`), user management (`/user/`) and task management (`/task/*`).
-   -Publishes task creation events with priority to RabbitMQ. 
+   - Endpoints for authentication (`/auth/*`), user management (`/user/*`) and task management (`/task/*`).
+    - Publishes task creation events with priority to RabbitMQ. 
 
 2. **Database** (PostgreSQL):
    - Stores users (with roles) and tasks. See database docs: [Database Docs](https://dbdocs.io/dennisboachie9/task-management-system)
@@ -135,10 +135,10 @@ Workers will process the task (status transitions: `pending` â†’ `in-progress` â
 6. **Role-Based Behavior**:
    - Admin: Full access (manage users/tasks).
     - Standard: Create tasks, update/get own tasks.
-    - Worker: Claim and process tasks (internal role, not user-facing).
+    - Worker: Claim and process tasks (internal/system role, not user-facing).
 
 ## Deliverables
 - API Docs: Swagger UI at [localhost](http://localhost:8000/api/v1).
-- Tests: Unit tests (`make test`) cover authentication and task logic; integration tests in tests/.
-- How to scale system to handle over a million users can be found at `scale.md`.
+- Tests: Unit tests (`make test`) cover authentication and task logic; 
+- How to scale system to handle over a million users can be found at `docs/scale.md`.
 - Deployment: Dockerized services; live demo at [api](https://task-manager-6x3jxg.fly.dev/api/v1/)

@@ -138,27 +138,35 @@ func (h *Server) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
-func isUserRoleAllowed(ctx *gin.Context, role db.UserRole) bool {
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	userRole := strings.ToUpper(authPayload.Role)
-
-	// Ensure user role is a valid role
-	if userRole != string(db.UserRoleADMIN) && userRole != string(db.UserRoleSTANDARD) {
-		ctx.JSON(http.StatusForbidden, HandleError(nil, http.StatusForbidden, "Forbidden: Invalid Role"))
+func isAdmin(ctx *gin.Context, strict bool) bool {
+	authPayload, exists := ctx.Get(authorizationPayloadKey)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, HandleError(nil, http.StatusUnauthorized, "Unauthorized: Missing auth payload"))
 		ctx.Abort()
 		return false
 	}
 
-	// If the required role is ADMIN, only allow ADMINs
-	if role == db.UserRoleADMIN && userRole != string(db.UserRoleADMIN) {
-		ctx.JSON(http.StatusForbidden, HandleError(nil, http.StatusForbidden, "Forbidden: Unauthorized"))
+	role, ok := authPayload.(*token.Payload)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, HandleError(nil, http.StatusUnauthorized, "Unauthorized: Invalid token payload"))
 		ctx.Abort()
 		return false
 	}
 
-	// Otherwise, allow both Standard Users and Admins
-	return true
+	// Direct role comparison instead of map lookup
+	switch db.UserRole(role.Role) {
+	case db.UserRoleADMIN:
+		return true
+	case db.UserRoleSTANDARD:
+		if strict {
+			break // If strict, STANDARD is not allowed
+		}
+		return true
+	}
+
+	ctx.JSON(http.StatusForbidden, HandleError(nil, http.StatusForbidden, "Forbidden: Unauthorized"))
+	ctx.Abort()
+	return false
 }
-
 
 

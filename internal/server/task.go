@@ -39,7 +39,7 @@ var (
 // @Failure		500			{object}	ErrorResponse
 // @Router			/task [get]
 func (s *Server) GetTasks(ctx *gin.Context) {
-	if !isUserRoleAllowed(ctx, db.UserRoleADMIN) {
+	if !isAdmin(ctx, true) {
 		return
 	}
 
@@ -76,7 +76,7 @@ func (s *Server) GetTasks(ctx *gin.Context) {
 // @Failure		500	{object}	ErrorResponse
 // @Router			/task/{id} [get]
 func (s *Server) GetTask(ctx *gin.Context) {
-	if !isUserRoleAllowed(ctx, db.UserRoleSTANDARD) {
+	if !isAdmin(ctx, db.UserRoleSTANDARD) {
 		return
 	}
 
@@ -178,7 +178,7 @@ func (s *Server) LongPollTaskStatus(ctx *gin.Context) {
 // @Failure		500		{object}	ErrorResponse
 // @Router			/task [post]
 func (s *Server) CreateTask(ctx *gin.Context) {
-	if !isUserRoleAllowed(ctx, db.UserRoleSTANDARD) {
+	if !isAdmin(ctx, false) {
 		return
 	}
 
@@ -264,7 +264,7 @@ func (s *Server) CreateTask(ctx *gin.Context) {
 // @Failure		500		{object}	ErrorResponse
 // @Router			/task/{id}/status [patch]
 func (s *Server) UpdateTaskStatus(ctx *gin.Context) {
-	if !isUserRoleAllowed(ctx, db.UserRoleADMIN) {
+	if !isAdmin(ctx, false) {
 		return
 	}
 
