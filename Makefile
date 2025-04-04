@@ -20,6 +20,18 @@ run:
 run-worker:
 	@go run cmd/worker/main.go
 
+checkout-api:
+	docker exec -it -u root task-manager-api sh
+
+checkout-wk:
+	docker exec -it -u root task-manager-worker sh
+
+logs-api:
+	docker logs task-manager-api
+
+logs-wk:
+	docker logs task-manager-worker
+
 sqlc:
 	sqlc generate
 
