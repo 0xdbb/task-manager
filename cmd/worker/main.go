@@ -110,11 +110,11 @@ func main() {
 }
 
 func runHeathCheckServer() {
-		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Worker is healthy"))
-		})
-		log.Println("Worker health check running on port 8001")
-		log.Fatal(http.ListenAndServe("0.0.0.0:8001", nil))
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Worker is healthy"))
+	})
+	log.Println("Worker health check running on port 8001")
+	log.Fatal(http.ListenAndServe("0.0.0.0:8001", nil))
 
 }
