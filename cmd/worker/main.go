@@ -12,7 +12,6 @@ import (
 	"task-manager/internal/queue"
 	"task-manager/internal/weather"
 	"task-manager/internal/worker"
-	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -78,7 +77,7 @@ func main() {
 
 	// ------- Initialize Worker -------
 	weatherProcessor := weather.NewWeatherProcessor(config.WeatherApiKey)
-	worker := worker.New(dbService, weatherProcessor, 30*time.Minute)
+	worker := worker.New(dbService, weatherProcessor)
 	worker.Consume(taskMsgs)
 
 	// ------- Graceful Shutdown Setup -------

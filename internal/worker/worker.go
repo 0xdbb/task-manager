@@ -38,11 +38,10 @@ var (
 	ErrInterrupt = errors.New("received interrupt")
 )
 
-func New(service *db.Service, processor TaskProcessor, timeout time.Duration) *Worker {
+func New(service *db.Service, processor TaskProcessor) *Worker {
 	return &Worker{
 		interrupt: make(chan os.Signal, 1),
 		complete:  make(chan error),
-		timeout:   time.After(timeout),
 		service:   service,
 		processor: processor,
 		logger:    log.New(os.Stdout, "worker: ", log.LstdFlags),
