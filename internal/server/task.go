@@ -76,7 +76,7 @@ func (s *Server) GetTasks(ctx *gin.Context) {
 // @Failure		500	{object}	ErrorResponse
 // @Router			/task/{id} [get]
 func (s *Server) GetTask(ctx *gin.Context) {
-	if !isAdmin(ctx, db.UserRoleSTANDARD) {
+	if !isAdmin(ctx, false) {
 		return
 	}
 

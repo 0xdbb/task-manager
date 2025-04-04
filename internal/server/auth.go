@@ -3,7 +3,6 @@ package server
 import (
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -168,5 +167,3 @@ func isAdmin(ctx *gin.Context, strict bool) bool {
 	ctx.Abort()
 	return false
 }
-
-
